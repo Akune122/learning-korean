@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K-Lab — Apprendre le Coréen : Hangeul, Grammaire, Vocabulaire & Exercices</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- BARRE LATÉRALE -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">한글</div>
+      <div>
+        <div class="brand-title">Coréen Essentiel</div>
+        <span class="brand-sub">Hangeul • Grammaire • Vocabulaire</span>
+      </div>
+    </div>
+
+    <div class="nav-group-label">Cours & Références</div>
+    <button class="nav-btn active" data-tab="hangul" onclick="switchTab('hangul')">
+      <span>🔤</span>
+      <span>1. Alphabet Hangeul & Sons</span>
+    </button>
+
+    <button class="nav-btn" data-tab="grammar" onclick="switchTab('grammar')">
+      <span>📐</span>
+      <span>2. Grammaire & Particules</span>
+    </button>
+
+    <button class="nav-btn" data-tab="vocab" onclick="switchTab('vocab')">
+      <span>📚</span>
+      <span>3. Vocabulaire Essentiel</span>
+    </button>
+
+    <div class="nav-group-label">Pratique Active</div>
+    <button class="nav-btn" data-tab="practice" onclick="switchTab('practice')">
+      <span>🎯</span>
+      <span>4. Exercices & Phrases</span>
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="voice-status">
+        <span class="status-dot" id="voice-dot"></span>
+        <span id="voice-label">Audio Coréen prêt</span>
+      </div>
+      <p>Écoutez chaque lettre, mot ou phrase à vitesse normale (🔊) ou ralentie (🐢).</p>
+      <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:8px;" onclick="speakKorean('안녕하세요! 한국어를 공부해요.', 0.85)">
+        🔊 Tester l'audio coréen
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div style="font-size:0.9rem; color:var(--text-secondary); font-weight:600;">
+        Méthode structurée : comprendre la logique du coréen plutôt que deviner par cœur
+      </div>
+      <div class="stats-row">
+        <div class="stat-chip">
+          <span>Séries terminées :</span>
+          <strong id="stat-exercises">0</strong>
+        </div>
+        <div class="stat-chip">
+          <span>Bonnes réponses :</span>
+          <strong id="stat-answers">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-container">
+
+      <!-- ====================================================
+           MODULE 1 : ALPHABET HANGEUL, RÈGLES DE LECTURE & LABO
+           ==================================================== -->
+      <section id="view-hangul" class="view-section active">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h1>1. L'Alphabet Hangeul (한글) & Règles de Prononciation</h1>
+              <p>Toutes les voyelles et consonnes avec leur équivalent en français, + les vraies règles de lecture (Batchim et Liaisons).</p>
+            </div>
+            <button class="btn btn-emerald" onclick="switchTab('practice'); startPracticeSession('hangul_basic')">
+              🎯 Lancer un exercice Hangeul
+            </button>
+          </div>
+        </div>
+
+        <div class="subtabs" id="hangul-subtabs">
+          <button class="subtab-btn active" data-sub="chars" onclick="switchHangulSubtab('chars')">
+            🔤 Tableau des Lettres & Sons (35)
+          </button>
+          <button class="subtab-btn" data-sub="rules" onclick="switchHangulSubtab('rules')">
+            📖 Règles de lecture (Batchim & Liaisons)
+          </button>
+          <button class="subtab-btn" data-sub="lab" onclick="switchHangulSubtab('lab')">
+            🧪 Constructeur de Syllabes
+          </button>
+        </div>
+
+        <!-- Sous-vue 1A : Tableau des lettres -->
+        <div id="hangul-sub-chars">
+          <div id="hangul-categories-container"></div>
+        </div>
+
+        <!-- Sous-vue 1B : Règles de lecture avancées -->
+        <div id="hangul-sub-rules" style="display:none;">
+          <div id="reading-rules-container"></div>
+        </div>
+
+        <!-- Sous-vue 1C : Laboratoire de syllabes -->
+        <div id="hangul-sub-lab" style="display:none;">
+          <div class="lab-grid">
+            <div>
+              <div class="selector-group">
+                <h3>1. Consonne initiale (초성 — obligatoire, ㅇ est muet)</h3>
+                <div class="jamo-buttons" id="lab-choseong"></div>
+              </div>
+              <div class="selector-group">
+                <h3>2. Voyelle centrale (중성)</h3>
+                <div class="jamo-buttons" id="lab-jungseong"></div>
+              </div>
+              <div class="selector-group">
+                <h3>3. Consonne finale / Batchim (종성 — optionnelle)</h3>
+                <div class="jamo-buttons" id="lab-jongseong"></div>
+              </div>
+            </div>
+
+            <div class="lab-preview-card">
+              <div style="font-size:0.8rem; text-transform:uppercase; color:var(--text-secondary); font-weight:700;">
+                Bloc Syllabique Résultant
+              </div>
+              <div class="lab-syllable-display" id="lab-big-char">아</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#60a5fa; margin-bottom:18px;" id="lab-formula-text">
+                ㅇ + ㅏ = 아 [a]
+              </div>
+              <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="btn btn-primary" onclick="playCurrentLabSyllable(0.88)">🔊 Écouter</button>
+                <button class="btn btn-secondary" onclick="playCurrentLabSyllable(0.5)">🐢 Lent</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           MODULE 2 : GRAMMAIRE FONDAMENTALE & STRUCTURE DE PHRASE
+           ==================================================== -->
+      <section id="view-grammar" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h1>2. Les Bases de la Grammaire Coréenne</h1>
+              <p>Comprendre comment construire de vraies phrases : ordre S-O-V, particules (은/는, 이/가, 을/를, 에/에서) et conjugaison (-아요/-어요).</p>
+            </div>
+            <button class="btn btn-emerald" onclick="switchTab('practice'); startPracticeSession('sentences')">
+              🎯 S'entraîner sur les phrases
+            </button>
+          </div>
+        </div>
+
+        <div id="grammar-lessons-container"></div>
+      </section>
+
+      <!-- ====================================================
+           MODULE 3 : VOCABULAIRE ESSENTIEL PAR THÈMES
+           ==================================================== -->
+      <section id="view-vocab" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h1>3. Vocabulaire Essentiel & Verbes Conjugués</h1>
+              <p>Les mots les plus utiles classés par thème avec prononciation normale/lente, infinitif + présent poli et explications littérales.</p>
+            </div>
+            <button class="btn btn-emerald" onclick="switchTab('practice'); startPracticeSession('vocab')">
+              🎯 Tester mon vocabulaire
+            </button>
+          </div>
+        </div>
+
+        <div class="vocab-toolbar">
+          <div class="subtabs" id="vocab-category-tabs" style="margin-bottom:0;"></div>
+          <input
+            type="text"
+            id="vocab-search"
+            class="search-input"
+            placeholder="🔍 Rechercher un mot (français, coréen...)"
+            oninput="filterAndRenderVocabCards()"
+          />
+        </div>
+
+        <div id="vocab-cards-container"></div>
+      </section>
+
+      <!-- ====================================================
+           MODULE 4 : CENTRE D'EXERCICES & CONSTRUCTION DE PHRASES
+           ==================================================== -->
+      <section id="view-practice" class="view-section">
+        <div class="page-header">
+          <h1>4. Centre d'Exercices & Pratique Active</h1>
+          <p>Choisissez ce que vous voulez travailler : chaque question vous donne l'audio coréen et l'explication grammaticale complète.</p>
+        </div>
+
+        <!-- Menu de sélection du mode d'exercice -->
+        <div id="trainer-menu">
+          <div class="trainer-modes-grid">
+            <div class="trainer-mode-card">
+              <div>
+                <span class="level-badge">Niveau 1 • Alphabet</span>
+                <h3>Hangeul : Voyelles & Consonnes de base</h3>
+                <p>Reconnaissance audio (🔊 / 🐢) et lecture des 18 lettres fondamentales du Hangeul.</p>
+              </div>
+              <button class="btn btn-primary" onclick="startPracticeSession('hangul_basic')">
+                Lancer (10 questions)
+              </button>
+            </div>
+
+            <div class="trainer-mode-card">
+              <div>
+                <span class="level-badge">Niveau 2 • Alphabet complet</span>
+                <h3>Hangeul Intégral (Doubles & Composées)</h3>
+                <p>Entraînement sur l'ensemble des 35 lettres incluant les voyelles en Y/W et consonnes aspirées/doubles.</p>
+              </div>
+              <button class="btn btn-primary" onclick="startPracticeSession('hangul_all')">
+                Lancer (10 questions)
+              </button>
+            </div>
+
+            <div class="trainer-mode-card">
+              <div>
+                <span class="level-badge">Niveau 3 • Grammaire</span>
+                <h3>Particules & Conjugaison au Présent</h3>
+                <p>Choisissez entre 이에요/예요, 을/를, 에/에서 et conjuguez les verbes en -아요/-어요 avec explication du pourquoi.</p>
+              </div>
+              <button class="btn btn-emerald" onclick="startPracticeSession('grammar')">
+                Lancer l'entraînement Grammaire
+              </button>
+            </div>
+
+            <div class="trainer-mode-card">
+              <div>
+                <span class="level-badge">Niveau 4 • Syntaxe S-O-V</span>
+                <h3>Construction de Phrases Coréennes</h3>
+                <p>Assemblez des phrases complètes dans l'ordre coréen (Temps + Lieu + Objet + Verbe final).</p>
+              </div>
+              <button class="btn btn-emerald" onclick="startPracticeSession('sentences')">
+                Construire des phrases
+              </button>
+            </div>
+
+            <div class="trainer-mode-card">
+              <div>
+                <span class="level-badge">Niveau 5 • Lexique</span>
+                <h3>Vocabulaire & Expressions de survie</h3>
+                <p>Testez votre mémoire sur les salutations, les verbes courants, les nombres et les mots du quotidien.</p>
+              </div>
+              <button class="btn btn-primary" onclick="startPracticeSession('vocab')">
+                Lancer le quiz Vocabulaire
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone d'exercice actif -->
+        <div id="trainer-active-area" style="display:none;">
+          <div class="exercise-box">
+            <div class="ex-progress-header">
+              <button class="btn btn-secondary btn-sm" onclick="exitPracticeSession()">← Retour aux modes</button>
+              <div class="progress-track">
+                <div class="progress-fill" id="trainer-progress-bar"></div>
+              </div>
+              <span style="font-size:0.84rem; color:var(--text-secondary); font-weight:700;" id="trainer-step-counter">
+                Question 1 / 10
+              </span>
+            </div>
+
+            <div id="trainer-question-body"></div>
+
+            <div id="trainer-feedback" class="feedback-banner"></div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+              <button id="trainer-submit-btn" class="btn btn-primary" disabled>Vérifier la réponse</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL DÉTAIL D'UNE LETTRE HANGEUL -->
+  <div id="detail-modal-backdrop" class="detail-modal-backdrop" onclick="closeLetterDetail(event)">
+    <div class="detail-modal">
+      <button class="modal-close" onclick="document.getElementById('detail-modal-backdrop').classList.remove('open')">✕</button>
+      <div id="detail-modal-body"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
