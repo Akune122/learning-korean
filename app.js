@@ -1,15 +1,22 @@
-// Application complète d'apprentissage du Coréen : Hangeul, Règles de lecture, Grammaire, Vocabulaire & Exercices
+// Application complète d'apprentissage du Coréen :
+// Hangeul, Ardoise de Tracé, Grammaire, Connecteurs, Politesse, Conjugaison, Vocabulaire,
+// Dialogues, Nombres/Heures/Prix, Prononciation Micro, Flashcards, Chrono 60s & Checklist A1
 
-const STORAGE_KEY = "korean_academy_progress_v2";
+const STORAGE_KEY = "korean_academy_progress_v4";
 
 let userState = {
   completedExercises: 0,
   correctAnswers: 0,
-  masteredHangul: []
+  bestSprintScore: 0,
+  romanMode: "visible", // 'visible' | 'hover' | 'hidden'
+  bookmarkedIds: [],    // IDs marqués d'une étoile ⭐
+  weakIds: [],          // IDs où l'utilisateur s'est trompé
+  checkedMilestones: [] // Paliers de la Checklist Niveau 1 validés
 };
 
 const ALL_HANGUL_MAP = {};
 const ALL_HANGUL_LIST = [];
+const ALL_VOCAB_MAP = {};
 const ALL_VOCAB_LIST = [];
 
 function initDataIndices() {
@@ -26,16 +33,17 @@ function initDataIndices() {
 
   VOCAB_CATEGORIES.forEach((cat) => {
     cat.words.forEach((w, idx) => {
-      // Pour l'audio des mots contenant " → " ou " / ", lire la forme coréenne propre
       const cleanKr = w.kr.includes("→")
         ? w.kr.split("→")[1].trim()
         : w.kr.replace(/\(.*?\)/g, "").split("/")[0].trim();
-      ALL_VOCAB_LIST.push({
+      const item = {
         id: `${cat.id}_${idx}`,
         categoryTitle: cat.title,
         ...w,
         audioKr: cleanKr
-      });
+      };
+      ALL_VOCAB_MAP[item.id] = item;
+      ALL_VOCAB_LIST.push(item);
     });
   });
 }
@@ -78,17 +86,24 @@ function updateVoiceStatus(ok, label) {
   if (text) text.textContent = label;
 }
 
-function speakKorean(text, rate = 0.88) {
-  if (!("speechSynthesis" in window)) return;
+function speakKorean(text, rate = 0.88, onEndCallback = null) {
+  if (!("speechSynthesis" in window)) {
+    if (onEndCallback) onEndCallback();
+    return;
+  }
   try {
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = "ko-KR";
     if (koreanVoice) utter.voice = koreanVoice;
     utter.rate = rate;
+    if (onEndCallback) {
+      utter.onend = onEndCallback;
+      utter.onerror = onEndCallback;
+    }
     window.speechSynthesis.speak(utter);
   } catch (e) {
-    console.warn("Erreur audio :", e);
+    if (onEndCallback) onEndCallback();
   }
 }
 
@@ -124,13 +139,16 @@ function playFeedbackTone(isSuccess) {
 }
 
 // ==========================================
-// 2. SAUVEGARDE & NAVIGATION
+// 2. SAUVEGARDE, MODE ROMANISATION & SYSTÈME SRS (FAVORIS / ERREURS)
 // ==========================================
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) userState = { ...userState, ...JSON.parse(raw) };
+    if (raw) {
+      userState = { ...userState, ...JSON.parse(raw) };
+    }
   } catch (e) {}
+  applyRomanMode(userState.romanMode || "visible");
   updateStatsHeader();
 }
 
@@ -141,14 +159,79 @@ function saveState() {
   updateStatsHeader();
 }
 
+function setRomanMode(mode) {
+  userState.romanMode = mode;
+  applyRomanMode(mode);
+  saveState();
+}
+
+function applyRomanMode(mode) {
+  document.body.setAttribute("data-roman", mode);
+  document.querySelectorAll(".roman-opt-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.rmode === mode);
+  });
+}
+
+function getReviewPoolIds() {
+  return Array.from(new Set([...userState.bookmarkedIds, ...userState.weakIds]));
+}
+
+function toggleBookmark(itemId, event) {
+  if (event) event.stopPropagation();
+  const idx = userState.bookmarkedIds.indexOf(itemId);
+  if (idx === -1) {
+    userState.bookmarkedIds.push(itemId);
+  } else {
+    userState.bookmarkedIds.splice(idx, 1);
+  }
+  saveState();
+  renderHangulModule();
+  filterAndRenderVocabCards();
+}
+
+function recordMistakeItem(itemId) {
+  if (!itemId) return;
+  if (!userState.weakIds.includes(itemId)) {
+    userState.weakIds.push(itemId);
+    saveState();
+  }
+}
+
+function clearMistakeItem(itemId) {
+  if (!itemId) return;
+  const idx = userState.weakIds.indexOf(itemId);
+  if (idx !== -1) {
+    userState.weakIds.splice(idx, 1);
+    saveState();
+  }
+}
+
 function updateStatsHeader() {
   const elEx = document.getElementById("stat-exercises");
   const elAns = document.getElementById("stat-answers");
+  const elWeakCount = document.getElementById("stat-weak-count");
+  const elPracticePill = document.getElementById("nav-weak-pill");
+  const elWeakCardCount = document.getElementById("trainer-weak-count-label");
+  const elSprintBest = document.getElementById("trainer-sprint-best-label");
+
+  const reviewCount = getReviewPoolIds().length;
   if (elEx) elEx.textContent = userState.completedExercises;
   if (elAns) elAns.textContent = userState.correctAnswers;
+  if (elWeakCount) elWeakCount.textContent = reviewCount;
+  if (elPracticePill) {
+    elPracticePill.textContent = reviewCount > 0 ? `${reviewCount} à revoir` : "";
+    elPracticePill.style.display = reviewCount > 0 ? "inline-block" : "none";
+  }
+  if (elWeakCardCount) {
+    elWeakCardCount.textContent = `${reviewCount} élément(s) enregistré(s)`;
+  }
+  if (elSprintBest) {
+    elSprintBest.textContent = `Record personnel : ${userState.bestSprintScore || 0} pts`;
+  }
 }
 
 function switchTab(tabId) {
+  if (sprintInterval) clearInterval(sprintInterval);
   document.querySelectorAll(".nav-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.tab === tabId);
   });
@@ -165,16 +248,20 @@ function switchHangulSubtab(subId) {
   document.getElementById("hangul-sub-chars").style.display = subId === "chars" ? "block" : "none";
   document.getElementById("hangul-sub-rules").style.display = subId === "rules" ? "block" : "none";
   document.getElementById("hangul-sub-lab").style.display = subId === "lab" ? "block" : "none";
+  document.getElementById("hangul-sub-stroke").style.display = subId === "stroke" ? "block" : "none";
+  if (subId === "stroke") {
+    drawCanvasWatermark();
+  }
 }
 
 // ==========================================
-// 3. RENDU DU MODULE 1 : HANGEUL & RÈGLES DE LECTURE
+// 3. RENDU DU MODULE 1 : HANGEUL, RÈGLES & ARDOISE D'ÉCRITURE
 // ==========================================
 function renderHangulModule() {
   const categories = [
     {
       title: "1. Voyelles simples (8 lettres)",
-      desc: "Cliquez sur une lettre pour entendre le son et afficher l'aide de prononciation détaillée.",
+      desc: "Cliquez sur une lettre pour entendre le son et afficher l'aide de prononciation détaillée. Cliquez sur ☆ pour l'ajouter à vos révisions.",
       items: HANGUL_DATA.vowelsBasic
     },
     {
@@ -195,19 +282,26 @@ function renderHangulModule() {
   ];
 
   const container = document.getElementById("hangul-categories-container");
+  if (!container) return;
+
   container.innerHTML = categories
     .map((cat) => {
       const cards = cat.items
-        .map(
-          (it) => `
-          <div class="hangul-card" onclick="openLetterDetail('${it.id}')">
-            <div class="kr-big">${it.char}</div>
-            <div class="kr-syllable">Syllabe : ${it.syllable}</div>
-            <span class="roman-tag">${it.roman}</span>
-            <div class="sound-hint">${it.frenchSound}</div>
-          </div>
-        `
-        )
+        .map((it) => {
+          const isStarred = userState.bookmarkedIds.includes(it.id);
+          const isWeak = userState.weakIds.includes(it.id);
+          return `
+            <div class="hangul-card ${isStarred || isWeak ? "weak-marked" : ""}" onclick="openLetterDetail('${it.id}')">
+              <button class="star-btn card-star-pos ${isStarred ? "starred" : ""}" title="Ajouter/Retirer des favoris à réviser" onclick="toggleBookmark('${it.id}', event)">
+                ${isStarred ? "⭐" : "☆"}
+              </button>
+              <div class="kr-big">${it.char}</div>
+              <div class="kr-syllable">Syllabe : ${it.syllable}</div>
+              <span class="roman-tag">${it.roman}</span>
+              <div class="sound-hint">${it.frenchSound}</div>
+            </div>
+          `;
+        })
         .join("");
 
       return `
@@ -220,35 +314,36 @@ function renderHangulModule() {
     })
     .join("");
 
-  // Rendu des règles de lecture avancées (Batchim & Liaisons)
   const rulesContainer = document.getElementById("reading-rules-container");
-  rulesContainer.innerHTML = READING_RULES.map((rule) => {
-    const bullets = rule.details.map((d) => `<li>${d}</li>`).join("");
-    const exCards = rule.examples
-      .map(
-        (ex) => `
-        <div class="rule-ex-box">
-          <div>
-            <div style="font-family:var(--font-kr); font-size:1.3rem; font-weight:800;">
-              ${ex.kr} <span style="font-size:0.85rem; color:#60a5fa; font-weight:600;">${ex.read}</span>
+  if (rulesContainer) {
+    rulesContainer.innerHTML = READING_RULES.map((rule) => {
+      const bullets = rule.details.map((d) => `<li>${d}</li>`).join("");
+      const exCards = rule.examples
+        .map(
+          (ex) => `
+          <div class="rule-ex-box">
+            <div>
+              <div style="font-family:var(--font-kr); font-size:1.3rem; font-weight:800;">
+                ${ex.kr} <span class="roman-text" style="font-size:0.85rem; color:#60a5fa; font-weight:600;">${ex.read}</span>
+              </div>
+              <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:2px;">${ex.fr}</div>
             </div>
-            <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:2px;">${ex.fr}</div>
+            <button class="btn btn-secondary btn-sm" onclick="speakKorean('${ex.kr}', 0.8)">🔊</button>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="speakKorean('${ex.kr}', 0.8)">🔊</button>
-        </div>
-      `
-      )
-      .join("");
+        `
+        )
+        .join("");
 
-    return `
-      <div class="rule-card">
-        <h3>${rule.title}</h3>
-        <div class="rule-summary">${rule.summary}</div>
-        <ul class="rule-list">${bullets}</ul>
-        <div class="rule-examples-grid">${exCards}</div>
-      </div>
-    `;
-  }).join("");
+      return `
+        <div class="rule-card">
+          <h3>${rule.title}</h3>
+          <div class="rule-summary">${rule.summary}</div>
+          <ul class="rule-list">${bullets}</ul>
+          <div class="rule-examples-grid">${exCards}</div>
+        </div>
+      `;
+    }).join("");
+  }
 }
 
 function openLetterDetail(itemId) {
@@ -312,6 +407,123 @@ function closeLetterDetail(event) {
 }
 
 // ==========================================
+// 3B. ARDOISE D'ÉCRITURE & ORDRE DES TRAITS (CANVAS)
+// ==========================================
+let currentStrokeIdx = 0;
+let isDrawing = false;
+
+function initStrokeOrderStudio() {
+  const selectorEl = document.getElementById("stroke-char-selector");
+  if (!selectorEl) return;
+
+  selectorEl.innerHTML = STROKE_ORDER_DATA.map(
+    (item, idx) =>
+      `<button class="jamo-btn ${idx === currentStrokeIdx ? "active" : ""}" onclick="selectStrokeLetter(${idx})">${item.char}</button>`
+  ).join("");
+
+  setupWritingCanvasEvents();
+  selectStrokeLetter(0, false);
+}
+
+function selectStrokeLetter(idx, autoSpeak = true) {
+  currentStrokeIdx = idx;
+  const item = STROKE_ORDER_DATA[idx];
+  if (!item) return;
+
+  document.querySelectorAll("#stroke-char-selector .jamo-btn").forEach((btn, bIdx) => {
+    btn.classList.toggle("active", bIdx === idx);
+  });
+
+  document.getElementById("stroke-info-title").textContent = `Lettre ${item.char} (${item.strokes} trait${item.strokes > 1 ? "s" : ""})`;
+  document.getElementById("stroke-steps-list").innerHTML = item.steps.map((s) => `<li>${s}</li>`).join("");
+  document.getElementById("stroke-handwriting-tip").textContent = item.handwritingTip;
+  document.getElementById("sample-print-char").textContent = `${item.char} (${item.syllable})`;
+  document.getElementById("sample-hand-char").textContent = `${item.char} (${item.syllable})`;
+
+  clearWritingCanvas();
+  if (autoSpeak) speakKorean(item.syllable, 0.85);
+}
+
+function setupWritingCanvasEvents() {
+  const canvas = document.getElementById("writing-canvas");
+  if (!canvas || canvas.dataset.bound) return;
+  canvas.dataset.bound = "1";
+  const ctx = canvas.getContext("2d");
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    isDrawing = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+
+  function moveDraw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctx.lineWidth = 10;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#3b82f6";
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  }
+
+  function endDraw() {
+    isDrawing = false;
+  }
+
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("mousemove", moveDraw);
+  window.addEventListener("mouseup", endDraw);
+  canvas.addEventListener("touchstart", startDraw, { passive: false });
+  canvas.addEventListener("touchmove", moveDraw, { passive: false });
+  window.addEventListener("touchend", endDraw);
+}
+
+function drawCanvasWatermark() {
+  const canvas = document.getElementById("writing-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Lignes guides en croix
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.07)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(canvas.width / 2, 0);
+  ctx.lineTo(canvas.width / 2, canvas.height);
+  ctx.moveTo(0, canvas.height / 2);
+  ctx.lineTo(canvas.width, canvas.height / 2);
+  ctx.stroke();
+
+  // Modèle en filigrane
+  const item = STROKE_ORDER_DATA[currentStrokeIdx];
+  if (item) {
+    ctx.font = "900 155px 'Noto Sans KR', sans-serif";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.11)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(item.char, canvas.width / 2, canvas.height / 2 + 6);
+  }
+}
+
+function clearWritingCanvas() {
+  drawCanvasWatermark();
+}
+
+// ==========================================
 // 4. LABORATOIRE DE SYLLABES
 // ==========================================
 let labState = { choIdx: 11, jungIdx: 0, jongIdx: 0 };
@@ -324,19 +536,19 @@ function initSyllableLab() {
 
   choEl.innerHTML = CHOSEONG_LIST.map(
     (c, idx) =>
-      `<button class="jamo-btn ${idx === labState.choIdx ? "active" : ""}" onclick="selectLabJamo('cho', ${idx})">${c.char} <small>${c.roman}</small></button>`
+      `<button class="jamo-btn ${idx === labState.choIdx ? "active" : ""}" onclick="selectLabJamo('cho', ${idx})">${c.char} <small class="roman-text">${c.roman}</small></button>`
   ).join("");
 
   jungEl.innerHTML = JUNGSEONG_LIST.map(
     (v, idx) =>
-      `<button class="jamo-btn ${idx === labState.jungIdx ? "active" : ""}" onclick="selectLabJamo('jung', ${idx})">${v.char} <small>${v.roman}</small></button>`
+      `<button class="jamo-btn ${idx === labState.jungIdx ? "active" : ""}" onclick="selectLabJamo('jung', ${idx})">${v.char} <small class="roman-text">${v.roman}</small></button>`
   ).join("");
 
   const commonJongIndices = [0, 1, 4, 7, 8, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27];
   jongEl.innerHTML = commonJongIndices
     .map((idx) => {
       const j = JONGSEONG_LIST[idx];
-      const label = j.char ? `${j.char} <small>-${j.roman}</small>` : "Aucun";
+      const label = j.char ? `${j.char} <small class="roman-text">-${j.roman}</small>` : "Aucun";
       return `<button class="jamo-btn ${idx === labState.jongIdx ? "active" : ""}" onclick="selectLabJamo('jong', ${idx})">${label}</button>`;
     })
     .join("");
@@ -365,7 +577,7 @@ function updateSyllableLabDisplay(autoPlay = true) {
   if (jong.char) parts.push(jong.char);
 
   document.getElementById("lab-big-char").textContent = syllableChar;
-  document.getElementById("lab-formula-text").textContent = `${parts.join(" + ")} = ${syllableChar} [${romanFull}]`;
+  document.getElementById("lab-formula-text").innerHTML = `${parts.join(" + ")} = ${syllableChar} <span class="roman-text">[${romanFull}]</span>`;
   if (autoPlay) speakKorean(syllableChar, 0.85);
 }
 
@@ -374,16 +586,18 @@ function playCurrentLabSyllable(rate = 0.85) {
 }
 
 // ==========================================
-// 5. RENDU DU MODULE 2 : GRAMMAIRE FONDAMENTALE
+// 5. MODULE 2 : GRAMMAIRE FONDAMENTALE & DÉCODEUR POLITESSE
 // ==========================================
 function renderGrammarModule() {
   const container = document.getElementById("grammar-lessons-container");
+  if (!container) return;
+
   container.innerHTML = GRAMMAR_LESSONS.map((lesson) => {
     const keyPointsHtml = lesson.keyPoints.map((kp) => `<li>${kp}</li>`).join("");
 
     const examplesHtml = lesson.examples
       .map((ex) => {
-        const cleanSpeak = ex.kr.includes("→") ? ex.kr.split("→")[1].split("/")[0].trim() : ex.kr;
+        const cleanSpeak = ex.kr.includes("→") ? ex.kr.split("→")[1].split("/")[0].trim() : ex.kr.split("(")[0].trim();
         const chips = ex.breakdown
           .map(
             (b) => `
@@ -444,17 +658,115 @@ function renderGrammarModule() {
       </article>
     `;
   }).join("");
+
+  // Rendu du tableau comparatif des 3 niveaux de politesse
+  const polBody = document.getElementById("politeness-table-body");
+  if (polBody) {
+    polBody.innerHTML = POLITENESS_COMPARISONS.map(
+      (row) => `
+      <tr>
+        <td style="font-weight:700; color:#34d399;">${row.meaning}</td>
+        <td>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div>
+              <div style="font-family:var(--font-kr); font-weight:800; font-size:1.05rem;">${row.formal.kr}</div>
+              <div class="roman-text" style="font-size:0.76rem; color:var(--text-secondary);">${row.formal.roman}</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="speakKorean('${row.formal.kr.split('/')[0].trim()}', 0.85)">🔊</button>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div>
+              <div style="font-family:var(--font-kr); font-weight:800; font-size:1.05rem; color:#60a5fa;">${row.polite.kr}</div>
+              <div class="roman-text" style="font-size:0.76rem; color:var(--text-secondary);">${row.polite.roman}</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="speakKorean('${row.polite.kr.split('/')[0].trim()}', 0.85)">🔊</button>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div>
+              <div style="font-family:var(--font-kr); font-weight:800; font-size:1.05rem; color:#fbbf24;">${row.casual.kr}</div>
+              <div class="roman-text" style="font-size:0.76rem; color:var(--text-secondary);">${row.casual.roman}</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="speakKorean('${row.casual.kr.split('/')[0].replace(/\(.*?\)/g, '').trim()}', 0.85)">🔊</button>
+          </div>
+        </td>
+      </tr>
+    `
+    ).join("");
+  }
 }
 
 // ==========================================
-// 6. RENDU DU MODULE 3 : VOCABULAIRE THÉMATIQUE
+// 6. MODULE 3 : ATELIER DE CONJUGAISON (PRÉSENT, PASSÉ, FUTUR, ENVIE)
+// ==========================================
+function renderConjugationModule() {
+  const container = document.getElementById("conjugation-list-container");
+  if (!container) return;
+
+  container.innerHTML = CONJUGATION_VERBS.map((v) => {
+    const tenses = [
+      { label: "Présent Poli (-아요/어요)", data: v.present },
+      { label: "Passé Poli (-았/었어요)", data: v.past },
+      { label: "Futur (-(으)ㄹ 거예요)", data: v.future },
+      { label: "Envie (-고 싶어요)", data: v.want }
+    ];
+
+    const tensesHtml = tenses
+      .map((t) => {
+        const canSpeak = !t.data.kr.startsWith("—");
+        return `
+          <div class="conj-tense-box">
+            <div>
+              <div class="conj-tense-label">${t.label}</div>
+              <div class="conj-tense-kr">${t.data.kr}</div>
+              <div class="roman-text" style="font-size:0.78rem; color:var(--text-secondary);">[${t.data.roman}]</div>
+              <div style="font-size:0.82rem; color:#34d399; font-weight:600; margin-top:2px;">${t.data.fr}</div>
+            </div>
+            ${
+              canSpeak
+                ? `<button class="btn btn-secondary btn-sm" onclick="speakKorean('${t.data.kr}', 0.85)">🔊</button>`
+                : ""
+            }
+          </div>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="conj-card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+          <div>
+            <span class="level-badge">${v.ruleGroup}</span>
+            <h3 style="font-size:1.3rem; font-weight:800;">
+              <span style="font-family:var(--font-kr); color:#fbbf24;">${v.infinitive}</span>
+              <span style="font-size:1rem; color:var(--text-secondary); font-weight:600;">(radical : ${v.stem}-)</span>
+              — ${v.meaning}
+            </h3>
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">💡 ${v.ruleNote}</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="speakKorean('${v.infinitive}', 0.85)">🔊 Infinitif</button>
+        </div>
+        <div class="conj-tenses-grid">${tensesHtml}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ==========================================
+// 7. MODULE 4 : VOCABULAIRE THÉMATIQUE
 // ==========================================
 let currentVocabFilter = "all";
 
 function renderVocabModule() {
   const tabsEl = document.getElementById("vocab-category-tabs");
+  if (!tabsEl) return;
+
   tabsEl.innerHTML = [
-    `<button class="subtab-btn ${currentVocabFilter === "all" ? "active" : ""}" onclick="setVocabCategory('all')">Tous les thèmes (${ALL_VOCAB_LIST.length})</button>`,
+    `<button class="subtab-btn ${currentVocabFilter === "all" ? "active" : ""}" onclick="setVocabCategory('all')">Tous (${ALL_VOCAB_LIST.length})</button>`,
+    `<button class="subtab-btn ${currentVocabFilter === "starred" ? "active" : ""}" onclick="setVocabCategory('starred')">⭐ Mes Favoris & Erreurs</button>`,
     ...VOCAB_CATEGORIES.map(
       (c) =>
         `<button class="subtab-btn ${currentVocabFilter === c.id ? "active" : ""}" onclick="setVocabCategory('${c.id}')">${c.icon} ${c.title.split(".")[1].trim()}</button>`
@@ -472,22 +784,29 @@ function setVocabCategory(catId) {
 function filterAndRenderVocabCards() {
   const query = (document.getElementById("vocab-search")?.value || "").toLowerCase().trim();
   const container = document.getElementById("vocab-cards-container");
+  if (!container) return;
+
+  const reviewIds = getReviewPoolIds();
 
   const categoriesToShow =
-    currentVocabFilter === "all"
+    currentVocabFilter === "all" || currentVocabFilter === "starred"
       ? VOCAB_CATEGORIES
       : VOCAB_CATEGORIES.filter((c) => c.id === currentVocabFilter);
 
-  container.innerHTML = categoriesToShow
+  const html = categoriesToShow
     .map((cat) => {
-      const filteredWords = cat.words.filter(
-        (w) =>
-          !query ||
-          w.kr.toLowerCase().includes(query) ||
-          w.roman.toLowerCase().includes(query) ||
-          w.fr.toLowerCase().includes(query) ||
-          w.note.toLowerCase().includes(query)
-      );
+      const filteredWords = cat.words
+        .map((w, idx) => ({ ...w, id: `${cat.id}_${idx}` }))
+        .filter((w) => {
+          if (currentVocabFilter === "starred" && !reviewIds.includes(w.id)) return false;
+          if (!query) return true;
+          return (
+            w.kr.toLowerCase().includes(query) ||
+            w.roman.toLowerCase().includes(query) ||
+            w.fr.toLowerCase().includes(query) ||
+            w.note.toLowerCase().includes(query)
+          );
+        });
 
       if (filteredWords.length === 0) return "";
 
@@ -496,18 +815,23 @@ function filterAndRenderVocabCards() {
           const cleanAudio = w.kr.includes("→")
             ? w.kr.split("→")[1].trim()
             : w.kr.replace(/\(.*?\)/g, "").split("/")[0].trim();
+          const isStarred = userState.bookmarkedIds.includes(w.id);
+          const isWeak = userState.weakIds.includes(w.id);
 
           return `
-            <div class="vocab-item-card">
+            <div class="vocab-item-card ${isStarred || isWeak ? "weak-marked" : ""}">
               <div>
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                   <div>
                     <div class="voc-kr">${w.kr}</div>
                     <div class="voc-roman">[${w.roman}]</div>
                   </div>
-                  <div style="display:flex; gap:6px;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <button class="star-btn ${isStarred ? "starred" : ""}" title="Ajouter aux favoris à réviser" onclick="toggleBookmark('${w.id}', event)">
+                      ${isStarred ? "⭐" : "☆"}
+                    </button>
                     <button class="btn btn-primary btn-sm" onclick="speakKorean('${cleanAudio.replace(/'/g, "\\'")}', 0.88)" title="Écouter">🔊</button>
-                    <button class="btn btn-secondary btn-sm" onclick="speakKorean('${cleanAudio.replace(/'/g, "\\'")}', 0.52)" title="Écouter lentement">🐢</button>
+                    <button class="btn btn-secondary btn-sm" onclick="speakKorean('${cleanAudio.replace(/'/g, "\\'")}', 0.52)" title="Lent">🐢</button>
                   </div>
                 </div>
                 <div class="voc-fr">${w.fr}</div>
@@ -527,10 +851,710 @@ function filterAndRenderVocabCards() {
       `;
     })
     .join("");
+
+  container.innerHTML =
+    html ||
+    `<div style="padding:32px; text-align:center; color:var(--text-secondary); background:var(--bg-surface); border-radius:12px;">Aucun mot trouvé pour ce filtre. Cliquez sur ☆ sur n'importe quel mot pour l'ajouter à vos favoris !</div>`;
 }
 
 // ==========================================
-// 7. CENTRE D'EXERCICES CIBLÉS (HANGEUL, GRAMMAIRE, PHRASES, VOCABULAIRE)
+// 8. MODULE 5 : MINI-DIALOGUES RÉELS INTERACTIFS
+// ==========================================
+let hideDialogueTranslations = false;
+
+function toggleDialogueTranslations() {
+  hideDialogueTranslations = !hideDialogueTranslations;
+  const btn = document.getElementById("toggle-dlg-fr-btn");
+  if (btn) {
+    btn.textContent = hideDialogueTranslations
+      ? "👁️ Afficher les traductions françaises"
+      : "🙈 Masquer les traductions françaises (Tester ma compréhension)";
+  }
+  document.querySelectorAll(".dlg-fr").forEach((el) => {
+    el.style.display = hideDialogueTranslations ? "none" : "block";
+  });
+}
+
+function renderDialoguesModule() {
+  const container = document.getElementById("dialogues-container");
+  if (!container) return;
+
+  container.innerHTML = REAL_DIALOGUES.map((dlg) => {
+    const linesHtml = dlg.lines
+      .map(
+        (line, lIdx) => `
+        <div class="dialogue-line" id="dlg-line-${dlg.id}-${lIdx}">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+            <div>
+              <div class="dlg-speaker">${line.speaker}</div>
+              <div class="dlg-kr">${line.kr}</div>
+              <div class="roman-text" style="font-size:0.84rem; color:#60a5fa;">${line.roman}</div>
+              <div class="dlg-fr" style="display:${hideDialogueTranslations ? "none" : "block"};">→ ${line.fr}</div>
+            </div>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+              <button class="btn btn-primary btn-sm" onclick="speakKorean('${line.kr.replace(/'/g, "\\'")}', 0.88)">🔊</button>
+              <button class="btn btn-secondary btn-sm" onclick="speakKorean('${line.kr.replace(/'/g, "\\'")}', 0.55)">🐢</button>
+            </div>
+          </div>
+          <div class="dlg-grammar">🔍 <strong>Analyse :</strong> ${line.grammarNote}</div>
+        </div>
+      `
+      )
+      .join("");
+
+    const quizOpts = dlg.quiz.options
+      .map(
+        (opt, oIdx) => `
+        <button class="btn btn-secondary btn-sm" style="justify-content:flex-start; text-align:left; width:100%; margin-top:6px;" onclick="checkDialogueQuiz('${dlg.id}', ${oIdx})">
+          ${opt}
+        </button>
+      `
+      )
+      .join("");
+
+    return `
+      <div class="dialogue-card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+          <div>
+            <span class="level-badge">${dlg.level}</span>
+            <h2 style="font-size:1.3rem; font-weight:800;">${dlg.title}</h2>
+            <p style="font-size:0.9rem; color:var(--text-secondary);">${dlg.situation}</p>
+          </div>
+          <button class="btn btn-emerald btn-sm" onclick="playFullDialogue('${dlg.id}')">
+            ▶ Écouter tout le dialogue
+          </button>
+        </div>
+
+        <div class="dialogue-lines">${linesHtml}</div>
+
+        <div style="background:var(--bg-elevated); border:1px solid var(--border-light); border-radius:12px; padding:16px;">
+          <div style="font-size:0.8rem; font-weight:800; color:#fbbf24; text-transform:uppercase; margin-bottom:4px;">
+            ❓ Question de compréhension
+          </div>
+          <div style="font-weight:700; margin-bottom:8px;">${dlg.quiz.question}</div>
+          <div>${quizOpts}</div>
+          <div id="dlg-quiz-fb-${dlg.id}" style="margin-top:10px; font-size:0.88rem; display:none;"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function playFullDialogue(dlgId) {
+  const dlg = REAL_DIALOGUES.find((d) => d.id === dlgId);
+  if (!dlg) return;
+
+  let idx = 0;
+  function playNext() {
+    document.querySelectorAll(".dialogue-line").forEach((el) => el.classList.remove("playing"));
+    if (idx >= dlg.lines.length) return;
+    const lineEl = document.getElementById(`dlg-line-${dlg.id}-${idx}`);
+    if (lineEl) lineEl.classList.add("playing");
+    const lineText = dlg.lines[idx].kr;
+    idx++;
+    speakKorean(lineText, 0.86, () => {
+      setTimeout(playNext, 350);
+    });
+  }
+  playNext();
+}
+
+function checkDialogueQuiz(dlgId, chosenIdx) {
+  const dlg = REAL_DIALOGUES.find((d) => d.id === dlgId);
+  if (!dlg) return;
+  const isOk = chosenIdx === dlg.quiz.correctIndex;
+  playFeedbackTone(isOk);
+  const fb = document.getElementById(`dlg-quiz-fb-${dlgId}`);
+  if (fb) {
+    fb.style.display = "block";
+    fb.style.color = isOk ? "#34d399" : "#fb7185";
+    fb.innerHTML = isOk ? `✅ ${dlg.quiz.explanation}` : `❌ Pas tout à fait ! ${dlg.quiz.explanation}`;
+  }
+}
+
+// ==========================================
+// 9. MODULE 6 : CONVERTISSEUR & GÉNÉRATEUR HEURES, PRIX EN WONS & COMPTEURS
+// ==========================================
+const NATIVE_HOURS = ["", "한", "두", "세", "네", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "열한", "열두"];
+const NATIVE_HOURS_ROMAN = ["", "han", "du", "se", "ne", "da-seot", "yeo-seot", "il-gop", "yeo-deol", "a-hop", "yeol", "yeol-han", "yeol-du"];
+const SINO_DIGITS = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
+const SINO_DIGITS_ROMAN = ["", "il", "i", "sam", "sa", "o", "yuk", "chil", "pal", "gu"];
+
+function numberToSinoKorean(n) {
+  if (n === 0) return { kr: "영", roman: "yeong" };
+  let kr = "";
+  let romanParts = [];
+
+  const man = Math.floor(n / 10000);
+  const remMan = n % 10000;
+  const cheon = Math.floor(remMan / 1000);
+  const remCheon = remMan % 1000;
+  const baek = Math.floor(remCheon / 100);
+  const remBaek = remCheon % 100;
+  const sip = Math.floor(remBaek / 10);
+  const unit = remBaek % 10;
+
+  if (man > 0) {
+    if (man === 1) {
+      kr += "만 ";
+      romanParts.push("man");
+    } else {
+      const sub = numberToSinoKorean(man);
+      kr += `${sub.kr}만 `;
+      romanParts.push(`${sub.roman}-man`);
+    }
+  }
+  if (cheon > 0) {
+    kr += (cheon === 1 ? "" : SINO_DIGITS[cheon]) + "천";
+    romanParts.push((cheon === 1 ? "" : SINO_DIGITS_ROMAN[cheon] + "-") + "cheon");
+  }
+  if (baek > 0) {
+    kr += (baek === 1 ? "" : SINO_DIGITS[baek]) + "백";
+    romanParts.push((baek === 1 ? "" : SINO_DIGITS_ROMAN[baek] + "-") + "baek");
+  }
+  if (sip > 0) {
+    kr += (sip === 1 ? "" : SINO_DIGITS[sip]) + "십";
+    romanParts.push((sip === 1 ? "" : SINO_DIGITS_ROMAN[sip] + "-") + "sip");
+  }
+  if (unit > 0) {
+    kr += SINO_DIGITS[unit];
+    romanParts.push(SINO_DIGITS_ROMAN[unit]);
+  }
+
+  return { kr: kr.trim(), roman: romanParts.join(" ") };
+}
+
+function updateTimeConverter(autoSpeak = false) {
+  const h = parseInt(document.getElementById("input-hour")?.value || "2", 10);
+  const m = parseInt(document.getElementById("input-minute")?.value || "30", 10);
+
+  const hKr = `${NATIVE_HOURS[h]} 시`;
+  const hRom = `${NATIVE_HOURS_ROMAN[h]} si`;
+
+  let mKr = "";
+  let mRom = "";
+  if (m > 0) {
+    const sinoM = numberToSinoKorean(m);
+    mKr = ` ${sinoM.kr} 분`;
+    mRom = ` ${sinoM.roman} bun`;
+    if (m === 30) {
+      mKr += " (ou 반)";
+      mRom += " (ou ban)";
+    }
+  }
+
+  const displayTime = `${String(h).padStart(2, "0")}h${String(m).padStart(2, "0")}`;
+  const fullKrSpeak = m === 0 ? hKr : `${hKr} ${numberToSinoKorean(m).kr} 분`;
+
+  document.getElementById("gen-time-digits").textContent = displayTime;
+  document.getElementById("gen-time-kr").textContent = `${hKr}${mKr}`;
+  document.getElementById("gen-time-roman").textContent = `[${hRom}${mRom}]`;
+  document.getElementById("gen-time-kr").dataset.speak = fullKrSpeak;
+
+  if (autoSpeak) speakKorean(fullKrSpeak, 0.85);
+}
+
+function randomizeTimeGenerator() {
+  const randomH = Math.floor(Math.random() * 12) + 1;
+  const minsPool = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+  const randomM = minsPool[Math.floor(Math.random() * minsPool.length)];
+  document.getElementById("input-hour").value = randomH;
+  document.getElementById("input-minute").value = randomM;
+  updateTimeConverter(true);
+}
+
+function updateWonConverter(autoSpeak = false) {
+  const val = parseInt(document.getElementById("input-won")?.value || "15000", 10);
+  const sino = numberToSinoKorean(val);
+  const fullKr = `${sino.kr} 원`;
+  const fullRom = `${sino.roman} won`;
+
+  document.getElementById("gen-won-digits").textContent = `${val.toLocaleString("fr-FR")} ₩`;
+  document.getElementById("gen-won-kr").textContent = fullKr;
+  document.getElementById("gen-won-roman").textContent = `[${fullRom}]`;
+  document.getElementById("gen-won-kr").dataset.speak = fullKr;
+
+  if (autoSpeak) speakKorean(fullKr, 0.85);
+}
+
+function randomizeWonGenerator() {
+  const samplePrices = [1500, 3000, 4500, 8000, 10000, 12000, 15000, 24000, 35000, 50000, 100000];
+  const picked = samplePrices[Math.floor(Math.random() * samplePrices.length)];
+  document.getElementById("input-won").value = picked;
+  updateWonConverter(true);
+}
+
+// ==========================================
+// 10. MODULE 7 : CHECKLIST PROGRESSION NIVEAU 1 (OBJECTIF A1)
+// ==========================================
+function renderChecklistModule() {
+  const container = document.getElementById("checklist-items-container");
+  if (!container) return;
+
+  const doneCount = userState.checkedMilestones.length;
+  const totalCount = LEVEL1_CHECKLIST.length;
+  const pct = Math.round((doneCount / totalCount) * 100);
+
+  const barEl = document.getElementById("checklist-progress-bar");
+  const labelEl = document.getElementById("checklist-progress-label");
+  if (barEl) barEl.style.width = `${pct}%`;
+  if (labelEl) labelEl.textContent = `${doneCount} / ${totalCount} paliers validés (${pct}%)`;
+
+  container.innerHTML = LEVEL1_CHECKLIST.map((item) => {
+    const isDone = userState.checkedMilestones.includes(item.id);
+    return `
+      <div class="checklist-item ${isDone ? "done" : ""}">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="chk-box-btn" onclick="toggleChecklistItem('${item.id}')">
+            ${isDone ? "✓" : ""}
+          </button>
+          <div>
+            <div style="font-weight:800; font-size:1.02rem;">${item.title}</div>
+            <div style="font-size:0.85rem; color:var(--text-secondary);">${item.desc}</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="switchTab('${item.tab}')">Ouvrir →</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function toggleChecklistItem(chkId) {
+  const idx = userState.checkedMilestones.indexOf(chkId);
+  if (idx === -1) {
+    userState.checkedMilestones.push(chkId);
+    playFeedbackTone(true);
+  } else {
+    userState.checkedMilestones.splice(idx, 1);
+  }
+  saveState();
+  renderChecklistModule();
+}
+
+// ==========================================
+// 11. AUTOMATE CLAVIER HANGEUL VIRTUEL (JAMO → SYLLABES UNICODE)
+// ==========================================
+const CHO_CHARS = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
+const JUNG_CHARS = ["ㅏ", "ㅐ", "ㅑ", "ㅒ", "ㅓ", "ㅔ", "ㅕ", "ㅖ", "ㅗ", "ㅘ", "ㅙ", "ㅚ", "ㅛ", "ㅜ", "ㅝ", "ㅞ", "ㅟ", "ㅠ", "ㅡ", "ㅢ", "ㅣ"];
+const JONG_CHARS = ["", "ㄱ", "ㄲ", "ㄳ", "ㄴ", "ㄵ", "ㄶ", "ㄷ", "ㄹ", "ㄺ", "ㄻ", "ㄼ", "ㄽ", "ㄾ", "ㄿ", "ㅀ", "ㅁ", "ㅂ", "ㅄ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
+
+const COMPOUND_VOWELS = {
+  "ㅗㅏ": "ㅘ", "ㅗㅐ": "ㅙ", "ㅗㅣ": "ㅚ",
+  "ㅜㅓ": "ㅝ", "ㅜㅔ": "ㅞ", "ㅜㅣ": "ㅟ",
+  "ㅡㅣ": "ㅢ"
+};
+
+let hangulJamoBuffer = [];
+
+function composeJamoSequence(jamos) {
+  let result = "";
+  let state = 0;
+  let cho = -1, jung = -1, jong = 0;
+
+  function flush() {
+    if (state === 1 && cho !== -1) {
+      result += CHO_CHARS[cho];
+    } else if (state >= 2 && cho !== -1 && jung !== -1) {
+      result += String.fromCodePoint(0xac00 + cho * 21 * 28 + jung * 28 + jong);
+    }
+    state = 0;
+    cho = -1;
+    jung = -1;
+    jong = 0;
+  }
+
+  for (let i = 0; i < jamos.length; i++) {
+    const ch = jamos[i];
+    if (ch === " ") {
+      flush();
+      result += " ";
+      continue;
+    }
+
+    const isVowel = JUNG_CHARS.includes(ch);
+    const isCons = CHO_CHARS.includes(ch);
+
+    if (isCons) {
+      if (state === 0) {
+        cho = CHO_CHARS.indexOf(ch);
+        state = 1;
+      } else if (state === 1) {
+        flush();
+        cho = CHO_CHARS.indexOf(ch);
+        state = 1;
+      } else if (state === 2) {
+        const jIdx = JONG_CHARS.indexOf(ch);
+        if (jIdx > 0) {
+          jong = jIdx;
+          state = 3;
+        } else {
+          flush();
+          cho = CHO_CHARS.indexOf(ch);
+          state = 1;
+        }
+      } else if (state === 3) {
+        flush();
+        cho = CHO_CHARS.indexOf(ch);
+        state = 1;
+      }
+    } else if (isVowel) {
+      if (state === 0) {
+        result += ch;
+      } else if (state === 1) {
+        jung = JUNG_CHARS.indexOf(ch);
+        state = 2;
+      } else if (state === 2) {
+        const curV = JUNG_CHARS[jung];
+        const combined = COMPOUND_VOWELS[curV + ch];
+        if (combined) {
+          jung = JUNG_CHARS.indexOf(combined);
+        } else {
+          flush();
+          result += ch;
+        }
+      } else if (state === 3) {
+        const prevJongChar = JONG_CHARS[jong];
+        const newChoIdx = CHO_CHARS.indexOf(prevJongChar);
+        if (newChoIdx !== -1) {
+          jong = 0;
+          flush();
+          cho = newChoIdx;
+          jung = JUNG_CHARS.indexOf(ch);
+          state = 2;
+        } else {
+          flush();
+          result += ch;
+        }
+      }
+    }
+  }
+  flush();
+  return result;
+}
+
+function pressVirtualKey(jamo) {
+  if (!trainerSession || trainerSession.checked) return;
+  if (jamo === "BACKSPACE") {
+    hangulJamoBuffer.pop();
+  } else if (jamo === "CLEAR") {
+    hangulJamoBuffer = [];
+  } else {
+    hangulJamoBuffer.push(jamo);
+  }
+  const composed = composeJamoSequence(hangulJamoBuffer);
+  trainerSession.selectedValue = composed;
+  const disp = document.getElementById("dictation-live-text");
+  if (disp) disp.textContent = composed || "…";
+  const btn = document.getElementById("trainer-submit-btn");
+  if (btn) btn.disabled = composed.length === 0;
+}
+
+function renderVirtualKeyboardHtml() {
+  const row1 = [
+    { k: "ㅂ", r: "b" }, { k: "ㅈ", r: "j" }, { k: "ㄷ", r: "d" }, { k: "ㄱ", r: "g" }, { k: "ㅅ", r: "s" },
+    { k: "ㅛ", r: "yo" }, { k: "ㅕ", r: "yeo" }, { k: "ㅑ", r: "ya" }, { k: "ㅐ", r: "ae" }, { k: "ㅔ", r: "e" }
+  ];
+  const row2 = [
+    { k: "ㅁ", r: "m" }, { k: "ㄴ", r: "n" }, { k: "ㅇ", r: "-/ng" }, { k: "ㄹ", r: "r/l" }, { k: "ㅎ", r: "h" },
+    { k: "ㅗ", r: "o" }, { k: "ㅓ", r: "eo" }, { k: "ㅏ", r: "a" }, { k: "ㅣ", r: "i" }
+  ];
+  const row3 = [
+    { k: "ㅋ", r: "k" }, { k: "ㅌ", r: "t" }, { k: "ㅊ", r: "ch" }, { k: "ㅍ", r: "p" },
+    { k: "ㅠ", r: "yu" }, { k: "ㅜ", r: "u" }, { k: "ㅡ", r: "eu" },
+    { k: "ㄲ", r: "kk" }, { k: "ㄸ", r: "tt" }, { k: "ㅃ", r: "pp" }, { k: "ㅆ", r: "ss" }, { k: "ㅉ", r: "jj" }
+  ];
+
+  const makeRow = (arr) =>
+    arr
+      .map(
+        (item) =>
+          `<button type="button" class="kr-key" onclick="pressVirtualKey('${item.k}')">${item.k}<small class="roman-text">${item.r}</small></button>`
+      )
+      .join("");
+
+  return `
+    <div class="kr-keyboard">
+      <div class="kr-kb-row">${makeRow(row1)}</div>
+      <div class="kr-kb-row">${makeRow(row2)}</div>
+      <div class="kr-kb-row">${makeRow(row3)}</div>
+      <div class="kr-kb-row" style="margin-top:8px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="pressVirtualKey('BACKSPACE')">⌫ Effacer 1 lettre</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="pressVirtualKey('CLEAR')">🗑️ Tout vider</button>
+      </div>
+    </div>
+  `;
+}
+
+// ==========================================
+// 12. RECONNAISSANCE VOCALE AU MICRO (SPEECH RECOGNITION KO-KR)
+// ==========================================
+let activeRecognizer = null;
+
+function triggerMicListening(targetKr) {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const statusEl = document.getElementById("mic-live-status");
+  const btnEl = document.getElementById("mic-btn-circle");
+
+  if (!SpeechRec) {
+    if (statusEl) {
+      statusEl.innerHTML = `<span style="color:#fbbf24;">⚠️ Votre navigateur ne supporte pas la reconnaissance vocale Web Speech (utilisez Chrome ou Edge). Vous pouvez valider manuellement ci-dessous !</span>`;
+    }
+    trainerSession.selectedValue = targetKr;
+    document.getElementById("trainer-submit-btn").disabled = false;
+    return;
+  }
+
+  try {
+    if (activeRecognizer) activeRecognizer.abort();
+    activeRecognizer = new SpeechRec();
+    activeRecognizer.lang = "ko-KR";
+    activeRecognizer.interimResults = false;
+    activeRecognizer.maxAlternatives = 3;
+
+    if (btnEl) btnEl.classList.add("listening");
+    if (statusEl) statusEl.textContent = "🎙️ Écoute en cours... Parlez en coréen maintenant !";
+
+    activeRecognizer.onresult = (event) => {
+      if (btnEl) btnEl.classList.remove("listening");
+      const transcripts = [];
+      for (let i = 0; i < event.results[0].length; i++) {
+        transcripts.push(event.results[0][i].transcript.trim());
+      }
+      const heard = transcripts[0] || "";
+      const normalize = (s) => s.replace(/[\s.,?!]/g, "");
+      const matched = transcripts.some((t) => normalize(t) === normalize(targetKr) || normalize(t).includes(normalize(targetKr)));
+
+      trainerSession.selectedValue = matched ? targetKr : heard;
+      if (statusEl) {
+        statusEl.innerHTML = matched
+          ? `<span style="color:#34d399; font-weight:800;">🎉 Entendu : « ${heard} » — Prononciation parfaite !</span>`
+          : `<span style="color:#fbbf24; font-weight:700;">Entendu : « ${heard || "..."} » (Attendu : ${targetKr}). Vous pouvez réessayer ou vérifier !</span>`;
+      }
+      document.getElementById("trainer-submit-btn").disabled = false;
+    };
+
+    activeRecognizer.onerror = (err) => {
+      if (btnEl) btnEl.classList.remove("listening");
+      if (statusEl) {
+        statusEl.innerHTML = `<span style="color:#fbbf24;">Micro non détecté ou silence (${err.error}). Cliquez à nouveau sur 🎙️ ou passez à la vérification.</span>`;
+      }
+      trainerSession.selectedValue = targetKr;
+      document.getElementById("trainer-submit-btn").disabled = false;
+    };
+
+    activeRecognizer.start();
+  } catch (e) {
+    if (btnEl) btnEl.classList.remove("listening");
+  }
+}
+
+// ==========================================
+// 13. DÉFI LECTURE CHRONO 60 SECONDES & FLASHCARDS RECTO-VERSO
+// ==========================================
+let sprintInterval = null;
+let sprintState = null;
+
+function startSpeedSprint() {
+  if (sprintInterval) clearInterval(sprintInterval);
+  sprintState = {
+    timeLeft: 60,
+    score: 0,
+    streak: 0,
+    currentQ: null
+  };
+
+  document.getElementById("trainer-menu").style.display = "none";
+  document.getElementById("trainer-active-area").style.display = "block";
+  document.getElementById("trainer-submit-btn").style.display = "none";
+  document.getElementById("trainer-feedback").className = "feedback-banner";
+
+  sprintInterval = setInterval(() => {
+    if (!sprintState) return;
+    sprintState.timeLeft--;
+    const timerEl = document.getElementById("sprint-timer-val");
+    if (timerEl) timerEl.textContent = `${sprintState.timeLeft}s`;
+    const pct = Math.round(((60 - sprintState.timeLeft) / 60) * 100);
+    document.getElementById("trainer-progress-bar").style.width = `${pct}%`;
+
+    if (sprintState.timeLeft <= 0) {
+      clearInterval(sprintInterval);
+      sprintInterval = null;
+      finishSpeedSprint();
+    }
+  }, 1000);
+
+  nextSprintQuestion();
+}
+
+function nextSprintQuestion() {
+  if (!sprintState) return;
+  const useVocab = Math.random() > 0.45;
+  const pool = useVocab ? ALL_VOCAB_LIST : ALL_HANGUL_LIST;
+  const target = pool[Math.floor(Math.random() * pool.length)];
+  const others = shuffle(pool.filter((x) => x.id !== target.id)).slice(0, 3);
+  const options = shuffle([target, ...others]);
+
+  sprintState.currentQ = { useVocab, target, options };
+  document.getElementById("trainer-step-counter").innerHTML = `⏱️ <strong id="sprint-timer-val" style="color:#fbbf24;">${sprintState.timeLeft}s</strong> | Score : <strong style="color:#34d399;">${sprintState.score}</strong>`;
+
+  const displayKr = useVocab ? target.audioKr : target.syllable;
+  const choicesHtml = options
+    .map((opt) => {
+      const label = useVocab ? opt.fr : `${opt.roman} (${opt.char})`;
+      return `<button class="choice-card" onclick="answerSprint('${opt.id}')"><div style="font-size:1.1rem; font-weight:800;">${label}</div></button>`;
+    })
+    .join("");
+
+  document.getElementById("trainer-question-body").innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:0.8rem; font-weight:800; color:#fbbf24; text-transform:uppercase;">⚡ Sprint Lecture Rapide 60s</div>
+      <div style="font-family:var(--font-kr); font-size:3.5rem; font-weight:900; margin:12px 0;">${displayKr}</div>
+    </div>
+    <div class="choices-grid">${choicesHtml}</div>
+  `;
+}
+
+function answerSprint(chosenId) {
+  if (!sprintState || !sprintState.currentQ) return;
+  const isOk = chosenId === sprintState.currentQ.target.id;
+  playFeedbackTone(isOk);
+  if (isOk) {
+    sprintState.score += 10;
+    userState.correctAnswers++;
+  } else {
+    recordMistakeItem(sprintState.currentQ.target.id);
+  }
+  nextSprintQuestion();
+}
+
+function finishSpeedSprint() {
+  const finalScore = sprintState ? sprintState.score : 0;
+  if (finalScore > (userState.bestSprintScore || 0)) {
+    userState.bestSprintScore = finalScore;
+  }
+  userState.completedExercises++;
+  saveState();
+
+  document.getElementById("trainer-question-body").innerHTML = `
+    <div style="text-align:center; padding:24px 0;">
+      <div style="font-size:3.5rem; margin-bottom:10px;">⚡</div>
+      <h2 style="font-size:1.8rem; font-weight:800; margin-bottom:6px;">Temps écoulé ! Score : ${finalScore} pts</h2>
+      <p style="color:#fbbf24; font-weight:700; margin-bottom:20px;">Record personnel : ${userState.bestSprintScore} pts</p>
+      <div style="display:flex; justify-content:center; gap:12px;">
+        <button class="btn btn-amber" onclick="startSpeedSprint()">🔄 Rejouer le Chrono 60s</button>
+        <button class="btn btn-secondary" onclick="exitPracticeSession()">Retour aux modes</button>
+      </div>
+    </div>
+  `;
+}
+
+// MODE FLASHCARDS RECTO-VERSO
+let flashcardDeck = [];
+let flashcardIdx = 0;
+let flashcardFlipped = false;
+
+function startFlashcards() {
+  const combined = [
+    ...ALL_HANGUL_LIST.map((h) => ({
+      id: h.id,
+      front: `${h.char} (${h.syllable})`,
+      audio: h.syllable,
+      backTitle: h.roman,
+      backSub: h.frenchSound,
+      backNote: h.mnemonic
+    })),
+    ...ALL_VOCAB_LIST.map((v) => ({
+      id: v.id,
+      front: v.kr,
+      audio: v.audioKr,
+      backTitle: v.fr,
+      backSub: `[${v.roman}]`,
+      backNote: v.note
+    }))
+  ];
+  flashcardDeck = shuffle(combined).slice(0, 15);
+  flashcardIdx = 0;
+  flashcardFlipped = false;
+
+  document.getElementById("trainer-menu").style.display = "none";
+  document.getElementById("trainer-active-area").style.display = "block";
+  document.getElementById("trainer-submit-btn").style.display = "none";
+  document.getElementById("trainer-feedback").className = "feedback-banner";
+  renderCurrentFlashcard();
+}
+
+function renderCurrentFlashcard() {
+  if (flashcardIdx >= flashcardDeck.length) {
+    userState.completedExercises++;
+    saveState();
+    document.getElementById("trainer-question-body").innerHTML = `
+      <div style="text-align:center; padding:24px 0;">
+        <div style="font-size:3rem;">🃏</div>
+        <h2 style="margin:10px 0;">Paquet de 15 Flashcards terminé !</h2>
+        <div style="display:flex; justify-content:center; gap:12px; margin-top:18px;">
+          <button class="btn btn-primary" onclick="startFlashcards()">🔄 Nouveau paquet</button>
+          <button class="btn btn-secondary" onclick="exitPracticeSession()">Retour aux modes</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const card = flashcardDeck[flashcardIdx];
+  const pct = Math.round((flashcardIdx / flashcardDeck.length) * 100);
+  document.getElementById("trainer-progress-bar").style.width = `${pct}%`;
+  document.getElementById("trainer-step-counter").textContent = `Carte ${flashcardIdx + 1} / ${flashcardDeck.length}`;
+
+  if (!flashcardFlipped) {
+    speakKorean(card.audio, 0.86);
+  }
+
+  document.getElementById("trainer-question-body").innerHTML = `
+    <div style="font-size:0.8rem; font-weight:700; color:#c084fc; text-transform:uppercase; margin-bottom:8px;">
+      🃏 Flashcards Recto-Verso (Cliquez sur la carte pour la retourner)
+    </div>
+    <div class="flashcard-stage" onclick="flipCurrentFlashcard()">
+      <div style="font-family:var(--font-kr); font-size:3rem; font-weight:900;">${card.front}</div>
+      ${
+        flashcardFlipped
+          ? `
+          <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border-light); width:100%;">
+            <div style="font-size:1.4rem; font-weight:800; color:#34d399;">${card.backTitle}</div>
+            <div style="color:#60a5fa; font-weight:600; margin-top:4px;">${card.backSub}</div>
+            <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:8px;">💡 ${card.backNote}</div>
+          </div>
+        `
+          : `<div style="font-size:0.85rem; color:var(--text-secondary); margin-top:14px;">👆 Cliquez pour révéler la réponse</div>`
+      }
+    </div>
+    <div style="display:flex; justify-content:center; gap:12px; margin-top:18px; flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="speakKorean('${card.audio.replace(/'/g, "\\'")}', 0.85)">🔊 Réécouter</button>
+      <button class="btn btn-amber" onclick="rateFlashcard(false)">❌ Difficile (Ajouter à mes révisions)</button>
+      <button class="btn btn-emerald" onclick="rateFlashcard(true)">✅ Connu (Carte suivante →)</button>
+    </div>
+  `;
+}
+
+function flipCurrentFlashcard() {
+  flashcardFlipped = !flashcardFlipped;
+  renderCurrentFlashcard();
+}
+
+function rateFlashcard(known) {
+  const card = flashcardDeck[flashcardIdx];
+  if (!known) {
+    recordMistakeItem(card.id);
+  } else {
+    userState.correctAnswers++;
+    saveState();
+  }
+  flashcardIdx++;
+  flashcardFlipped = false;
+  renderCurrentFlashcard();
+}
+
+// ==========================================
+// 14. CENTRE D'EXERCICES PRINCIPAL (MODES CLASSIQUES + MICRO + EXAMEN A1)
 // ==========================================
 let trainerSession = null;
 
@@ -544,9 +1568,53 @@ function shuffle(arr) {
 }
 
 function startPracticeSession(mode) {
+  if (sprintInterval) {
+    clearInterval(sprintInterval);
+    sprintInterval = null;
+  }
+  document.getElementById("trainer-submit-btn").style.display = "inline-flex";
+
   let questions = [];
 
-  if (mode === "hangul_basic" || mode === "hangul_all") {
+  if (mode === "weak_review") {
+    const reviewIds = getReviewPoolIds();
+    if (reviewIds.length === 0) {
+      alert("Vous n'avez encore aucun élément dans vos Favoris (⭐) ou Erreurs ! Cliquez sur ☆ sur une carte ou lancez une série normale.");
+      return;
+    }
+
+    reviewIds.forEach((id) => {
+      if (ALL_HANGUL_MAP[id]) {
+        const item = ALL_HANGUL_MAP[id];
+        const others = shuffle(ALL_HANGUL_LIST.filter((x) => x.id !== item.id)).slice(0, 3);
+        questions.push({
+          qType: "hangul_read",
+          itemId: item.id,
+          badge: "Révision Ciblée • Hangeul",
+          title: `Comment se prononce le caractère « ${item.char} » (bloc ${item.syllable}) ?`,
+          item,
+          options: shuffle([item, ...others])
+        });
+      } else if (ALL_VOCAB_MAP[id]) {
+        const word = ALL_VOCAB_MAP[id];
+        const others = shuffle(ALL_VOCAB_LIST.filter((w) => w.id !== word.id)).slice(0, 3);
+        questions.push({
+          qType: "vocab_kr_to_fr",
+          itemId: word.id,
+          badge: `Révision Ciblée • ${word.categoryTitle}`,
+          word,
+          options: shuffle([word, ...others])
+        });
+      }
+    });
+    questions = shuffle(questions).slice(0, 12);
+  } else if (mode === "mic_speaking") {
+    questions = shuffle(MIC_CHALLENGES).slice(0, 6).map((mc) => ({
+      qType: "mic_challenge",
+      badge: "🎤 Prononciation Orale au Micro",
+      mc
+    }));
+  } else if (mode === "hangul_basic" || mode === "hangul_all") {
     const pool =
       mode === "hangul_basic"
         ? [...HANGUL_DATA.vowelsBasic, ...HANGUL_DATA.consonantsBasic]
@@ -560,6 +1628,7 @@ function startPracticeSession(mode) {
       if (idx % 2 === 0) {
         questions.push({
           qType: "hangul_listen",
+          itemId: item.id,
           badge: "Hangeul • Écoute & Reconnaissance",
           title: "Écoutez le son et choisissez le caractère Hangeul correspondant :",
           item,
@@ -568,6 +1637,7 @@ function startPracticeSession(mode) {
       } else {
         questions.push({
           qType: "hangul_read",
+          itemId: item.id,
           badge: "Hangeul • Lecture phonétique",
           title: `Comment se prononce le caractère « ${item.char} » (bloc ${item.syllable}) ?`,
           item,
@@ -575,6 +1645,42 @@ function startPracticeSession(mode) {
         });
       }
     });
+  } else if (mode === "dictation") {
+    questions = shuffle(DICTATION_WORDS)
+      .slice(0, 8)
+      .map((dw) => ({
+        qType: "dictation_kb",
+        badge: "Dictée & Écriture au Clavier Hangeul",
+        dw
+      }));
+  } else if (mode === "conjugation") {
+    const usableVerbs = CONJUGATION_VERBS.filter((v) => !v.want.kr.startsWith("—"));
+    const tenseKeys = [
+      { key: "present", name: "Présent poli (-아요/어요/해요)" },
+      { key: "past", name: "Passé poli (-았어요/었어요/했어요)" },
+      { key: "future", name: "Futur (-(으)ㄹ 거예요)" },
+      { key: "want", name: "Envie / Vouloir (-고 싶어요)" }
+    ];
+
+    shuffle(usableVerbs)
+      .slice(0, 8)
+      .forEach((verb, idx) => {
+        const t = tenseKeys[idx % tenseKeys.length];
+        const correctForm = verb[t.key].kr;
+        const wrongForms = tenseKeys
+          .filter((tk) => tk.key !== t.key)
+          .map((tk) => verb[tk.key].kr);
+
+        questions.push({
+          qType: "conj_quiz",
+          badge: `Conjugaison • ${t.name}`,
+          verb,
+          tenseLabel: t.name,
+          correct: correctForm,
+          targetData: verb[t.key],
+          options: shuffle([correctForm, ...wrongForms])
+        });
+      });
   } else if (mode === "grammar") {
     const fillQs = GRAMMAR_EXERCISES.filter((q) => q.type === "fill_particle");
     questions = shuffle(fillQs).map((q) => ({
@@ -607,11 +1713,42 @@ function startPracticeSession(mode) {
       const options = shuffle([word, ...others]);
       questions.push({
         qType: idx % 2 === 0 ? "vocab_kr_to_fr" : "vocab_fr_to_kr",
+        itemId: word.id,
         badge: `Vocabulaire • ${word.categoryTitle}`,
         word,
         options
       });
     });
+  } else if (mode === "exam_a1") {
+    // Examen Blanc Complet Niveau 1 (12 questions couvrant Hangeul, Vocabulaire, Particules, Conjugaison & Syntaxe)
+    const hSample = shuffle(ALL_HANGUL_LIST).slice(0, 3).map((item) => ({
+      qType: "hangul_read",
+      itemId: item.id,
+      badge: "Examen A1 • Partie 1 : Hangeul",
+      title: `Comment se prononce « ${item.char} » (${item.syllable}) ?`,
+      item,
+      options: shuffle([item, ...shuffle(ALL_HANGUL_LIST.filter((x) => x.id !== item.id)).slice(0, 3)])
+    }));
+    const gSample = shuffle(GRAMMAR_EXERCISES.filter((q) => q.type === "fill_particle")).slice(0, 3).map((q) => ({
+      qType: "grammar_fill",
+      badge: "Examen A1 • Partie 2 : Particules",
+      ...q,
+      shuffledOptions: shuffle(q.options)
+    }));
+    const sSample = shuffle(GRAMMAR_EXERCISES.filter((q) => q.type === "sentence_order")).slice(0, 2).map((q) => ({
+      qType: "sentence_order",
+      badge: "Examen A1 • Partie 3 : Syntaxe S-O-V",
+      ...q,
+      bank: shuffle([...q.blocks, ...(q.distractors || [])])
+    }));
+    const vSample = shuffle(ALL_VOCAB_LIST).slice(0, 4).map((word) => ({
+      qType: "vocab_kr_to_fr",
+      itemId: word.id,
+      badge: "Examen A1 • Partie 4 : Vocabulaire",
+      word,
+      options: shuffle([word, ...shuffle(ALL_VOCAB_LIST.filter((w) => w.id !== word.id)).slice(0, 3)])
+    }));
+    questions = [...hSample, ...gSample, ...sSample, ...vSample];
   }
 
   trainerSession = {
@@ -630,14 +1767,19 @@ function startPracticeSession(mode) {
 }
 
 function exitPracticeSession() {
+  if (sprintInterval) {
+    clearInterval(sprintInterval);
+    sprintInterval = null;
+  }
   trainerSession = null;
   document.getElementById("trainer-active-area").style.display = "none";
   document.getElementById("trainer-menu").style.display = "block";
+  updateStatsHeader();
 }
 
 function renderTrainerStep() {
   if (!trainerSession) return;
-  const { questions, index, score } = trainerSession;
+  const { questions, index } = trainerSession;
 
   if (index >= questions.length) {
     renderTrainerSummary();
@@ -648,6 +1790,7 @@ function renderTrainerStep() {
   trainerSession.selectedValue = null;
   trainerSession.builtBlocks = [];
   trainerSession.checked = false;
+  hangulJamoBuffer = [];
 
   const pct = Math.round((index / questions.length) * 100);
   document.getElementById("trainer-progress-bar").style.width = `${pct}%`;
@@ -655,7 +1798,30 @@ function renderTrainerStep() {
 
   const container = document.getElementById("trainer-question-body");
 
-  if (q.qType === "hangul_listen") {
+  if (q.qType === "mic_challenge") {
+    speakKorean(q.mc.kr, 0.85);
+    container.innerHTML = `
+      <div style="font-size:0.8rem; font-weight:700; color:#c084fc; text-transform:uppercase; margin-bottom:6px;">${q.badge}</div>
+      <h3 style="font-size:1.25rem; margin-bottom:14px;">Écoutez puis prononcez cette expression à voix haute :</h3>
+      <div style="background:var(--bg-elevated); border:1px solid var(--border-light); border-radius:14px; padding:22px; text-align:center;">
+        <div style="font-family:var(--font-kr); font-size:2.4rem; font-weight:900;">${q.mc.kr}</div>
+        <div class="roman-text" style="color:#60a5fa; font-size:0.95rem; margin-top:4px;">[${q.mc.roman}]</div>
+        <div style="color:#34d399; font-weight:700; font-size:1.05rem; margin-top:4px;">« ${q.mc.fr} »</div>
+        <div style="font-size:0.84rem; color:var(--text-secondary); margin-top:8px;">💡 ${q.mc.tip}</div>
+        <div style="display:flex; justify-content:center; gap:10px; margin-top:14px;">
+          <button class="btn btn-primary btn-sm" onclick="speakKorean('${q.mc.kr}', 0.88)">🔊 Écouter modèle</button>
+          <button class="btn btn-secondary btn-sm" onclick="speakKorean('${q.mc.kr}', 0.52)">🐢 Lent</button>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:22px;">
+        <button id="mic-btn-circle" class="mic-record-btn" onclick="triggerMicListening('${q.mc.kr}')" title="Cliquer et parler en coréen">🎙️</button>
+        <div id="mic-live-status" style="margin-top:12px; font-size:0.9rem; color:var(--text-secondary);">
+          Cliquez sur le micro 🎙️ et prononcez <strong>${q.mc.kr}</strong>
+        </div>
+      </div>
+    `;
+  } else if (q.qType === "hangul_listen") {
     speakKorean(q.item.syllable, 0.85);
     const choicesHtml = q.options
       .map(
@@ -698,6 +1864,50 @@ function renderTrainerStep() {
           <div style="font-family:var(--font-kr); font-size:3.2rem; font-weight:900;">${q.item.char}</div>
           <div style="font-size:0.8rem; color:#60a5fa;">🔊 Cliquer pour écouter (${q.item.syllable})</div>
         </div>
+      </div>
+      <div class="choices-grid">${choicesHtml}</div>
+    `;
+  } else if (q.qType === "dictation_kb") {
+    speakKorean(q.dw.kr, 0.82);
+    container.innerHTML = `
+      <div style="font-size:0.8rem; font-weight:700; color:#c084fc; text-transform:uppercase; margin-bottom:6px;">${q.badge}</div>
+      <h3 style="font-size:1.25rem; margin-bottom:8px;">Écrivez en Hangeul le mot correspondant à :</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; background:var(--bg-elevated); padding:14px 18px; border-radius:12px;">
+        <div>
+          <div style="font-size:1.35rem; font-weight:800; color:#34d399;">« ${q.dw.fr} »</div>
+          <div style="font-size:0.84rem; color:var(--text-secondary);">Indice décomposition : ${q.dw.hint}</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary btn-sm" onclick="speakKorean('${q.dw.kr}', 0.85)">🔊 Écouter</button>
+          <button class="btn btn-secondary btn-sm" onclick="speakKorean('${q.dw.kr}', 0.5)">🐢 Lent</button>
+        </div>
+      </div>
+
+      <div class="dictation-input-box">
+        <span id="dictation-live-text">…</span>
+      </div>
+      <div style="font-size:0.8rem; color:var(--text-secondary); text-align:center;">
+        Cliquez sur les lettres coréennes ci-dessous : les syllabes s'assemblent automatiquement !
+      </div>
+      ${renderVirtualKeyboardHtml()}
+    `;
+  } else if (q.qType === "conj_quiz") {
+    const choicesHtml = q.options
+      .map(
+        (opt) => `
+        <button class="choice-card" id="tchoice-${opt}" onclick="selectTrainerChoice('${opt}', '${opt}')">
+          <div style="font-family:var(--font-kr); font-size:1.45rem; font-weight:800;">${opt}</div>
+        </button>
+      `
+      )
+      .join("");
+
+    container.innerHTML = `
+      <div style="font-size:0.8rem; font-weight:700; color:#c084fc; text-transform:uppercase; margin-bottom:6px;">${q.badge}</div>
+      <h3 style="font-size:1.25rem; margin-bottom:12px;">Conjuguez le verbe suivant au <strong>${q.tenseLabel}</strong> :</h3>
+      <div style="background:var(--bg-elevated); border:1px solid var(--border-light); border-radius:12px; padding:18px; text-align:center;">
+        <div style="font-family:var(--font-kr); font-size:2rem; font-weight:900; color:#fbbf24;">${q.verb.infinitive}</div>
+        <div style="color:#34d399; font-weight:700;">Sens : « ${q.verb.meaning} » (Radical : ${q.verb.stem}-)</div>
       </div>
       <div class="choices-grid">${choicesHtml}</div>
     `;
@@ -758,7 +1968,7 @@ function renderTrainerStep() {
       <h3 style="font-size:1.25rem; margin-bottom:16px;">Que signifie cette expression coréenne ?</h3>
       <div style="background:var(--bg-elevated); border:1px solid var(--border-light); border-radius:14px; padding:20px; text-align:center; margin-bottom:16px;">
         <div style="font-family:var(--font-kr); font-size:2rem; font-weight:900;">${q.word.kr}</div>
-        <div style="color:#60a5fa; font-size:0.9rem; margin-top:4px;">[${q.word.roman}]</div>
+        <div class="roman-text" style="color:#60a5fa; font-size:0.9rem; margin-top:4px;">[${q.word.roman}]</div>
         <div style="margin-top:10px;">
           <button class="btn btn-primary btn-sm" onclick="speakKorean('${q.word.audioKr.replace(/'/g, "\\'")}', 0.88)">🔊 Écouter</button>
           <button class="btn btn-secondary btn-sm" onclick="speakKorean('${q.word.audioKr.replace(/'/g, "\\'")}', 0.52)">🐢 Lent</button>
@@ -772,7 +1982,7 @@ function renderTrainerStep() {
         (opt) => `
         <button class="choice-card" id="tchoice-${opt.id}" onclick="selectTrainerChoice('${opt.id}', '${opt.audioKr.replace(/'/g, "\\'")}')">
           <div style="font-family:var(--font-kr); font-size:1.35rem; font-weight:800;">${opt.kr}</div>
-          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:3px;">${opt.roman}</div>
+          <div class="roman-text" style="font-size:0.8rem; color:var(--text-secondary); margin-top:3px;">${opt.roman}</div>
         </button>
       `
       )
@@ -856,7 +2066,12 @@ function checkTrainerStep() {
   let isCorrect = false;
   let explanationText = "";
 
-  if (q.qType === "hangul_listen" || q.qType === "hangul_read") {
+  if (q.qType === "mic_challenge") {
+    const norm = (s) => (s || "").replace(/[\s.,?!]/g, "");
+    isCorrect = norm(trainerSession.selectedValue) === norm(q.mc.kr);
+    explanationText = `<strong>${q.mc.kr}</strong> [${q.mc.roman}] — ${q.mc.fr}.<br>💡 ${q.mc.tip}`;
+    speakKorean(q.mc.kr, 0.88);
+  } else if (q.qType === "hangul_listen" || q.qType === "hangul_read") {
     isCorrect = trainerSession.selectedValue === q.item.id;
     explanationText = `<strong>${q.item.char} (${q.item.syllable})</strong> se prononce « <strong>${q.item.roman}</strong> » — ${q.item.frenchSound}.`;
     const correctEl = document.getElementById(`tchoice-${q.item.id}`);
@@ -864,6 +2079,19 @@ function checkTrainerStep() {
     if (correctEl) correctEl.classList.add("correct");
     if (!isCorrect && selEl) selEl.classList.add("wrong");
     speakKorean(q.item.syllable, 0.88);
+  } else if (q.qType === "dictation_kb") {
+    const typed = (trainerSession.selectedValue || "").trim();
+    isCorrect = typed === q.dw.kr;
+    explanationText = `Mot attendu : <strong style="font-family:var(--font-kr); font-size:1.2rem;">${q.dw.kr}</strong> [${q.dw.roman}] = <strong>${q.dw.fr}</strong> (${q.dw.hint}).`;
+    speakKorean(q.dw.kr, 0.88);
+  } else if (q.qType === "conj_quiz") {
+    isCorrect = trainerSession.selectedValue === q.correct;
+    explanationText = `<strong>${q.verb.infinitive} → ${q.correct}</strong> [${q.targetData.roman}] (${q.targetData.fr}).<br>💡 ${q.verb.ruleNote}`;
+    const correctEl = document.getElementById(`tchoice-${q.correct}`);
+    const selEl = document.getElementById(`tchoice-${trainerSession.selectedValue}`);
+    if (correctEl) correctEl.classList.add("correct");
+    if (!isCorrect && selEl) selEl.classList.add("wrong");
+    speakKorean(q.correct, 0.88);
   } else if (q.qType === "grammar_fill") {
     isCorrect = trainerSession.selectedValue === q.correct;
     explanationText = `<strong>Phrase complète : ${q.audioFull}</strong><br>${q.explanation}`;
@@ -890,7 +2118,14 @@ function checkTrainerStep() {
   if (isCorrect) {
     trainerSession.score++;
     userState.correctAnswers++;
+    if (trainerSession.mode === "weak_review" && q.itemId) {
+      clearMistakeItem(q.itemId);
+    }
     saveState();
+  } else {
+    if (q.itemId) {
+      recordMistakeItem(q.itemId);
+    }
   }
 
   const fb = document.getElementById("trainer-feedback");
@@ -926,11 +2161,11 @@ function renderTrainerSummary() {
       <div style="font-size:3.5rem; margin-bottom:10px;">🎯</div>
       <h2 style="font-size:1.75rem; font-weight:800; margin-bottom:6px;">Série terminée : ${score} / ${questions.length} (${pct}%)</h2>
       <p style="color:var(--text-secondary); margin-bottom:24px;">
-        Chaque erreur accompagnée de son explication grammaticale vous fait progresser concrètement.
+        Vos erreurs éventuelles ont été automatiquement ajoutées à votre carnet « Mes Points Faibles & Favoris ».
       </p>
-      <div style="display:flex; justify-content:center; gap:12px;">
+      <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="startPracticeSession('${mode}')">🔄 Refaire une série</button>
-        <button class="btn btn-secondary" onclick="exitPracticeSession()">Choisir un autre thème</button>
+        <button class="btn btn-secondary" onclick="exitPracticeSession()">Choisir un autre mode</button>
       </div>
     </div>
   `;
@@ -949,6 +2184,12 @@ window.addEventListener("DOMContentLoaded", () => {
   initSpeechSynthesis();
   renderHangulModule();
   initSyllableLab();
+  initStrokeOrderStudio();
   renderGrammarModule();
+  renderConjugationModule();
   renderVocabModule();
+  renderDialoguesModule();
+  updateTimeConverter(false);
+  updateWonConverter(false);
+  renderChecklistModule();
 });

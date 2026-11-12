@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>K-Lab — Apprendre le Coréen : Hangeul, Grammaire, Vocabulaire & Exercices</title>
+  <title>Coréen Essentiel — Hangeul, Grammaire, Conjugaison, Dialogues, Micro & Exercices</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body data-roman="visible">
 
   <!-- BARRE LATÉRALE -->
   <aside class="sidebar">
@@ -14,30 +14,44 @@
       <div class="brand-badge">한글</div>
       <div>
         <div class="brand-title">Coréen Essentiel</div>
-        <span class="brand-sub">Hangeul • Grammaire • Vocabulaire</span>
+        <span class="brand-sub">Méthode complète & interactive</span>
       </div>
     </div>
 
-    <div class="nav-group-label">Cours & Références</div>
+    <div class="nav-group-label">Cours & Fondations</div>
     <button class="nav-btn active" data-tab="hangul" onclick="switchTab('hangul')">
-      <span>🔤</span>
-      <span>1. Alphabet Hangeul & Sons</span>
+      <span class="nav-btn-left"><span>🔤</span><span>1. Alphabet & Tracé</span></span>
     </button>
 
     <button class="nav-btn" data-tab="grammar" onclick="switchTab('grammar')">
-      <span>📐</span>
-      <span>2. Grammaire & Particules</span>
+      <span class="nav-btn-left"><span>📐</span><span>2. Grammaire & Politesse</span></span>
+    </button>
+
+    <button class="nav-btn" data-tab="conjugation" onclick="switchTab('conjugation')">
+      <span class="nav-btn-left"><span>⚙️</span><span>3. Atelier Conjugaison</span></span>
     </button>
 
     <button class="nav-btn" data-tab="vocab" onclick="switchTab('vocab')">
-      <span>📚</span>
-      <span>3. Vocabulaire Essentiel</span>
+      <span class="nav-btn-left"><span>📚</span><span>4. Vocabulaire & Favoris</span></span>
     </button>
 
-    <div class="nav-group-label">Pratique Active</div>
+    <div class="nav-group-label">Mise en Situation</div>
+    <button class="nav-btn" data-tab="dialogues" onclick="switchTab('dialogues')">
+      <span class="nav-btn-left"><span>💬</span><span>5. Dialogues Réels</span></span>
+    </button>
+
+    <button class="nav-btn" data-tab="numbers" onclick="switchTab('numbers')">
+      <span class="nav-btn-left"><span>🕒</span><span>6. Heures, Prix & Nombres</span></span>
+    </button>
+
+    <div class="nav-group-label">Entraînement & Suivi</div>
     <button class="nav-btn" data-tab="practice" onclick="switchTab('practice')">
-      <span>🎯</span>
-      <span>4. Exercices & Phrases</span>
+      <span class="nav-btn-left"><span>🎯</span><span>7. Exercices, Micro & Chrono</span></span>
+      <span class="nav-pill-count" id="nav-weak-pill" style="display:none;"></span>
+    </button>
+
+    <button class="nav-btn" data-tab="roadmap" onclick="switchTab('roadmap')">
+      <span class="nav-btn-left"><span>🏆</span><span>8. Objectif Niveau 1 (A1)</span></span>
     </button>
 
     <div class="sidebar-footer">
@@ -45,8 +59,8 @@
         <span class="status-dot" id="voice-dot"></span>
         <span id="voice-label">Audio Coréen prêt</span>
       </div>
-      <p>Écoutez chaque lettre, mot ou phrase à vitesse normale (🔊) ou ralentie (🐢).</p>
-      <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:8px;" onclick="speakKorean('안녕하세요! 한국어를 공부해요.', 0.85)">
+      <p>Écoutez chaque mot à vitesse normale (🔊) ou ralentie (🐢).</p>
+      <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:8px;" onclick="speakKorean('안녕하세요! 오늘도 화이팅!', 0.85)">
         🔊 Tester l'audio coréen
       </button>
     </div>
@@ -55,12 +69,21 @@
   <!-- CONTENU PRINCIPAL -->
   <div class="main-wrapper">
     <header class="topbar">
-      <div style="font-size:0.9rem; color:var(--text-secondary); font-weight:600;">
-        Méthode structurée : comprendre la logique du coréen plutôt que deviner par cœur
+      <!-- Switch Global Romanisation -->
+      <div class="roman-switcher" title="Masquez la romanisation dès que possible pour forcer votre œil à lire le Hangeul !">
+        <span class="roman-switcher-label">🙈 Romanisation :</span>
+        <button class="roman-opt-btn active" data-rmode="visible" onclick="setRomanMode('visible')">Visible</button>
+        <button class="roman-opt-btn" data-rmode="hover" onclick="setRomanMode('hover')">Au survol</button>
+        <button class="roman-opt-btn" data-rmode="hidden" onclick="setRomanMode('hidden')">Masquée (Pro)</button>
       </div>
+
       <div class="stats-row">
+        <div class="stat-chip" style="cursor:pointer;" onclick="switchTab('practice')" title="Cliquer pour réviser vos favoris et erreurs">
+          <span>⭐ À revoir :</span>
+          <strong id="stat-weak-count" style="color:#fbbf24;">0</strong>
+        </div>
         <div class="stat-chip">
-          <span>Séries terminées :</span>
+          <span>Séries :</span>
           <strong id="stat-exercises">0</strong>
         </div>
         <div class="stat-chip">
@@ -73,24 +96,32 @@
     <main class="content-container">
 
       <!-- ====================================================
-           MODULE 1 : ALPHABET HANGEUL, RÈGLES DE LECTURE & LABO
+           MODULE 1 : ALPHABET HANGEUL, RÈGLES, LABO & ARDOISE DE TRACÉ
            ==================================================== -->
       <section id="view-hangul" class="view-section active">
         <div class="page-header">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
             <div>
-              <h1>1. L'Alphabet Hangeul (한글) & Règles de Prononciation</h1>
-              <p>Toutes les voyelles et consonnes avec leur équivalent en français, + les vraies règles de lecture (Batchim et Liaisons).</p>
+              <h1>1. L'Alphabet Hangeul (한글), Lecture & Écriture</h1>
+              <p>Cliquez sur une carte pour écouter le son et voir la position de la bouche. Cliquez sur ☆ pour ajouter une lettre à vos révisions.</p>
             </div>
-            <button class="btn btn-emerald" onclick="switchTab('practice'); startPracticeSession('hangul_basic')">
-              🎯 Lancer un exercice Hangeul
-            </button>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-emerald" onclick="switchTab('practice'); startPracticeSession('hangul_basic')">
+                🎯 Quiz Hangeul
+              </button>
+              <button class="btn btn-secondary" onclick="switchTab('practice'); startPracticeSession('dictation')">
+                ⌨️ Mode Dictée
+              </button>
+            </div>
           </div>
         </div>
 
         <div class="subtabs" id="hangul-subtabs">
           <button class="subtab-btn active" data-sub="chars" onclick="switchHangulSubtab('chars')">
             🔤 Tableau des Lettres & Sons (35)
+          </button>
+          <button class="subtab-btn" data-sub="stroke" onclick="switchHangulSubtab('stroke')">
+            ✍️ Ardoise & Ordre des Traits (Manuscrit)
           </button>
           <button class="subtab-btn" data-sub="rules" onclick="switchHangulSubtab('rules')">
             📖 Règles de lecture (Batchim & Liaisons)
@@ -105,12 +136,58 @@
           <div id="hangul-categories-container"></div>
         </div>
 
-        <!-- Sous-vue 1B : Règles de lecture avancées -->
+        <!-- Sous-vue 1B : Ardoise d'écriture & Ordre des traits -->
+        <div id="hangul-sub-stroke" style="display:none;">
+          <div class="selector-group">
+            <h3>Choisissez une lettre pour voir son ordre des traits et vous entraîner à la tracer :</h3>
+            <div class="jamo-buttons" id="stroke-char-selector"></div>
+          </div>
+
+          <div class="stroke-studio-grid">
+            <div class="canvas-wrapper">
+              <div style="font-size:0.8rem; color:var(--text-secondary); font-weight:700; margin-bottom:8px;">
+                ✍️ Tracez à la souris ou au doigt (Haut → Bas, Gauche → Droite)
+              </div>
+              <canvas id="writing-canvas" width="250" height="250"></canvas>
+              <div style="display:flex; gap:10px; margin-top:12px;">
+                <button class="btn btn-secondary btn-sm" onclick="clearWritingCanvas()">🗑️ Effacer l'ardoise</button>
+                <button class="btn btn-primary btn-sm" onclick="speakKorean(STROKE_ORDER_DATA[currentStrokeIdx].syllable, 0.85)">🔊 Écouter</button>
+              </div>
+            </div>
+
+            <div class="rule-card" style="margin-bottom:0;">
+              <h3 id="stroke-info-title">Lettre ㄱ</h3>
+              <div style="font-size:0.85rem; color:var(--text-secondary); font-weight:700; margin-top:8px;">
+                Ordre officiel des traits :
+              </div>
+              <ul class="rule-list" id="stroke-steps-list" style="margin-top:6px;"></ul>
+
+              <div style="background:var(--bg-elevated); border-left:3px solid var(--accent-amber); padding:10px 14px; border-radius:8px; margin-bottom:14px;">
+                <div style="font-size:0.75rem; text-transform:uppercase; color:#fbbf24; font-weight:800;">👀 Pourquoi connaître l'ordre des traits ? (Écriture manuscrite)</div>
+                <div id="stroke-handwriting-tip" style="font-size:0.88rem; margin-top:2px;"></div>
+              </div>
+
+              <div style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);">Comparaison : Police d'imprimerie vs Écriture manuscrite coréenne :</div>
+              <div class="font-compare-row">
+                <div class="font-sample-card">
+                  <div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Imprimerie</div>
+                  <div class="sample-print" id="sample-print-char">ㄱ (가)</div>
+                </div>
+                <div class="font-sample-card">
+                  <div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Manuscrit</div>
+                  <div class="sample-hand" id="sample-hand-char">ㄱ (가)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sous-vue 1C : Règles de lecture -->
         <div id="hangul-sub-rules" style="display:none;">
           <div id="reading-rules-container"></div>
         </div>
 
-        <!-- Sous-vue 1C : Laboratoire de syllabes -->
+        <!-- Sous-vue 1D : Laboratoire de syllabes -->
         <div id="hangul-sub-lab" style="display:none;">
           <div class="lab-grid">
             <div>
@@ -146,33 +223,104 @@
       </section>
 
       <!-- ====================================================
-           MODULE 2 : GRAMMAIRE FONDAMENTALE & STRUCTURE DE PHRASE
+           MODULE 2 : GRAMMAIRE FONDAMENTALE, CONNECTEURS & POLITESSE
            ==================================================== -->
       <section id="view-grammar" class="view-section">
         <div class="page-header">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
             <div>
-              <h1>2. Les Bases de la Grammaire Coréenne</h1>
-              <p>Comprendre comment construire de vraies phrases : ordre S-O-V, particules (은/는, 이/가, 을/를, 에/에서) et conjugaison (-아요/-어요).</p>
+              <h1>2. Grammaire, Connecteurs & Niveaux de Politesse</h1>
+              <p>9 leçons structurées : ordre S-O-V, particules, connecteurs (-고, -지만, 하고) et décodeur des 3 niveaux de politesse.</p>
             </div>
             <button class="btn btn-emerald" onclick="switchTab('practice'); startPracticeSession('sentences')">
-              🎯 S'entraîner sur les phrases
+              🎯 Construire des phrases
             </button>
           </div>
         </div>
 
         <div id="grammar-lessons-container"></div>
+
+        <!-- Décodeur interactif des 3 niveaux de politesse -->
+        <div class="grammar-card">
+          <span class="level-badge">Décodeur Culturel • K-Drama vs Vie Réelle</span>
+          <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:6px;">🎭 Comparateur des 3 Niveaux de Politesse</h2>
+          <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:12px;">
+            Écoutez comment une même expression se transforme selon que vous parlez dans un cadre officiel (-습니다), dans la vie courante (-요) ou entre amis proches en Banmal (sans -요).
+          </p>
+          <div style="overflow-x:auto;">
+            <table class="politeness-table">
+              <thead>
+                <tr>
+                  <th>Sens en Français</th>
+                  <th>🏛️ Formel (-습니다 / -ㅂ니다)</th>
+                  <th>🤝 Poli Courant (-아요 / -어요)</th>
+                  <th>🏠 Familier / Banmal (반말)</th>
+                </tr>
+              </thead>
+              <tbody id="politeness-table-body"></tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- ====================================================
-           MODULE 3 : VOCABULAIRE ESSENTIEL PAR THÈMES
+           MODULE 3 : ATELIER DE CONJUGAISON (PRÉSENT, PASSÉ, FUTUR, ENVIE)
+           ==================================================== -->
+      <section id="view-conjugation" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h1>3. Atelier de Conjugaison Coréenne ⚙️</h1>
+              <p>Apprenez à transformer l'infinitif du dictionnaire (-다) aux 4 temps les plus utiles : Présent, Passé, Futur et Envie (-고 싶어요).</p>
+            </div>
+            <button class="btn btn-emerald" onclick="switchTab('practice'); startPracticeSession('conjugation')">
+              🎯 Lancer le Quiz Conjugaison
+            </button>
+          </div>
+        </div>
+
+        <div class="rule-card" style="margin-bottom:24px;">
+          <h3>📌 Mémo rapide des 4 formes indispensables</h3>
+          <div class="rule-examples-grid" style="margin-top:12px;">
+            <div class="rule-ex-box">
+              <div>
+                <div style="font-weight:800; color:#60a5fa;">1. Présent Poli (-아요 / -어요 / -해요)</div>
+                <div style="font-size:0.83rem; color:var(--text-secondary);">Voyelle ㅏ/ㅗ → +아요 | Autre → +어요 | 하다 → 해요</div>
+              </div>
+            </div>
+            <div class="rule-ex-box">
+              <div>
+                <div style="font-weight:800; color:#c084fc;">2. Passé Poli (-았어요 / -었어요 / -했어요)</div>
+                <div style="font-size:0.83rem; color:var(--text-secondary);">Même règle de voyelle qu'au présent, mais avec 았 / 었 / 했 !</div>
+              </div>
+            </div>
+            <div class="rule-ex-box">
+              <div>
+                <div style="font-weight:800; color:#fbbf24;">3. Futur (-(으)ㄹ 거예요)</div>
+                <div style="font-size:0.83rem; color:var(--text-secondary);">Sans Batchim → +ㄹ 거예요 (갈 거예요) | Avec Batchim → +을 거예요 (먹을 거예요)</div>
+              </div>
+            </div>
+            <div class="rule-ex-box">
+              <div>
+                <div style="font-weight:800; color:#34d399;">4. Envie / Vouloir (Radical + -고 싶어요)</div>
+                <div style="font-size:0.83rem; color:var(--text-secondary);">Aucune fusion ! Enlevez -다 et collez -고 싶어요 (가고 싶어요, 먹고 싶어요)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="conjugation-list-container"></div>
+      </section>
+
+      <!-- ====================================================
+           MODULE 4 : VOCABULAIRE ESSENTIEL PAR THÈMES
            ==================================================== -->
       <section id="view-vocab" class="view-section">
         <div class="page-header">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
             <div>
-              <h1>3. Vocabulaire Essentiel & Verbes Conjugués</h1>
-              <p>Les mots les plus utiles classés par thème avec prononciation normale/lente, infinitif + présent poli et explications littérales.</p>
+              <h1>4. Vocabulaire Essentiel & Carnet de Favoris ⭐</h1>
+              <p>Cliquez sur ☆ sur n'importe quel mot pour l'épingler dans vos révisions personnelles.</p>
             </div>
             <button class="btn btn-emerald" onclick="switchTab('practice'); startPracticeSession('vocab')">
               🎯 Tester mon vocabulaire
@@ -195,71 +343,252 @@
       </section>
 
       <!-- ====================================================
-           MODULE 4 : CENTRE D'EXERCICES & CONSTRUCTION DE PHRASES
+           MODULE 5 : MINI-DIALOGUES RÉELS INTERACTIFS
+           ==================================================== -->
+      <section id="view-dialogues" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h1>5. Mini-Dialogues Réels en Contexte 💬</h1>
+              <p>Lisez et écoutez de vraies conversations coréennes avec l'analyse grammaticale de chaque phrase.</p>
+            </div>
+            <button id="toggle-dlg-fr-btn" class="btn btn-secondary" onclick="toggleDialogueTranslations()">
+              🙈 Masquer les traductions françaises (Tester ma compréhension)
+            </button>
+          </div>
+        </div>
+
+        <div id="dialogues-container"></div>
+      </section>
+
+      <!-- ====================================================
+           MODULE 6 : NOMBRES, HEURES & PRIX EN WONS (GÉNÉRATEUR)
+           ==================================================== -->
+      <section id="view-numbers" class="view-section">
+        <div class="page-header">
+          <h1>6. Atelier Pratique : Heures, Prix en Wons & Compteurs 🕒</h1>
+          <p>En coréen, on combine les deux systèmes de nombres tous les jours. Utilisez les générateurs ci-dessous pour vous entraîner !</p>
+        </div>
+
+        <div class="generator-grid">
+          <div class="gen-card">
+            <span class="level-badge">Natif (Heures) + Sino-Coréen (Minutes)</span>
+            <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:6px;">🕒 Lire l'Heure en Coréen (시 / 분)</h3>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">
+              Règle : L'heure utilise le <strong>Natif Coréen</strong> (한 시, 두 시, 세 시...) et les minutes utilisent le <strong>Sino-Coréen</strong> (십오 분, 삼십 분...).
+            </p>
+
+            <div style="display:flex; gap:10px; align-items:center; margin-top:14px;">
+              <label style="font-size:0.85rem; color:var(--text-secondary);">Heure (1-12) :</label>
+              <input type="number" id="input-hour" min="1" max="12" value="2" class="search-input" style="min-width:75px; padding:6px 10px;" onchange="updateTimeConverter(true)" />
+              <label style="font-size:0.85rem; color:var(--text-secondary);">Minutes (0-59) :</label>
+              <input type="number" id="input-minute" min="0" max="59" value="30" class="search-input" style="min-width:75px; padding:6px 10px;" onchange="updateTimeConverter(true)" />
+            </div>
+
+            <div class="gen-display-box">
+              <div class="gen-big-number" id="gen-time-digits">02h30</div>
+              <div class="gen-kr-result" id="gen-time-kr" data-speak="두 시 삼십 분">두 시 삼십 분 (ou 반)</div>
+              <div class="roman-text" style="color:#60a5fa; font-size:0.9rem; margin-top:4px;" id="gen-time-roman">[du si sam-sip bun]</div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="speakKorean(document.getElementById('gen-time-kr').dataset.speak, 0.85)">
+                🔊 Écouter l'heure
+              </button>
+              <button class="btn btn-amber" onclick="randomizeTimeGenerator()">
+                🎲 Tirer une heure au hasard
+              </button>
+            </div>
+          </div>
+
+          <div class="gen-card">
+            <span class="level-badge">100 % Sino-Coréen (Tranches de 10 000 = 만)</span>
+            <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:6px;">💴 Lire les Prix en Wons (원)</h3>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">
+              Règle : 100 = <strong>백</strong>, 1 000 = <strong>천</strong>, et 10 000 a son propre mot : <strong>만 (man)</strong> ! (Ex : 15 000 ₩ = 만 오천 원).
+            </p>
+
+            <div style="display:flex; gap:10px; align-items:center; margin-top:14px;">
+              <label style="font-size:0.85rem; color:var(--text-secondary);">Montant (₩) :</label>
+              <input type="number" id="input-won" min="100" max="990000" step="500" value="15000" class="search-input" style="min-width:140px; padding:6px 10px;" onchange="updateWonConverter(true)" />
+            </div>
+
+            <div class="gen-display-box">
+              <div class="gen-big-number" id="gen-won-digits">15 000 ₩</div>
+              <div class="gen-kr-result" id="gen-won-kr" data-speak="만 오천 원">만 오천 원</div>
+              <div class="roman-text" style="color:#60a5fa; font-size:0.9rem; margin-top:4px;" id="gen-won-roman">[man o-cheon won]</div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="speakKorean(document.getElementById('gen-won-kr').dataset.speak, 0.85)">
+                🔊 Écouter le prix
+              </button>
+              <button class="btn btn-amber" onclick="randomizeWonGenerator()">
+                🎲 Prix aléatoire
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rule-card">
+          <h3>🔢 Les 4 Compteurs (Classificateurs) avec Nombres Natifs</h3>
+          <p class="rule-summary">Quand on compte des objets, des tasses ou des personnes, les nombres 1, 2, 3, 4 raccourcissent devant le compteur : 하나 → <strong>한</strong>, 둘 → <strong>두</strong>, 셋 → <strong>세</strong>, 넷 → <strong>네</strong>.</p>
+          <div class="rule-examples-grid">
+            <div class="rule-ex-box">
+              <div>
+                <div style="font-family:var(--font-kr); font-size:1.25rem; font-weight:800;">개 (gae) — Objets en général</div>
+                <div style="font-size:0.84rem; color:var(--text-secondary);">사과 한 개 (1 pomme), 두 개 (2), 세 개 (3)</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="speakKorean('한 개, 두 개, 세 개', 0.82)">🔊</button>
+            </div>
+            <div class="rule-ex-box">
+              <div>
+                <div style="font-family:var(--font-kr); font-size:1.25rem; font-weight:800;">잔 (jan) — Tasses & Verres</div>
+                <div style="font-size:0.84rem; color:var(--text-secondary);">커피 한 잔 주세요 (Un café SVP)</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="speakKorean('커피 한 잔 주세요', 0.82)">🔊</button>
+            </div>
+            <div class="rule-ex-box">
+              <div>
+                <div style="font-family:var(--font-kr); font-size:1.25rem; font-weight:800;">명 (myeong) — Personnes</div>
+                <div style="font-size:0.84rem; color:var(--text-secondary);">두 명이에요 (Nous sommes 2 personnes - au restaurant)</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="speakKorean('두 명이에요', 0.82)">🔊</button>
+            </div>
+            <div class="rule-ex-box">
+              <div>
+                <div style="font-family:var(--font-kr); font-size:1.25rem; font-weight:800;">살 (sal) — Âge (Années)</div>
+                <div style="font-size:0.84rem; color:var(--text-secondary);">스무 살 (20 ans), 스물다섯 살 (25 ans)</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="speakKorean('스물다섯 살이에요', 0.82)">🔊</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           MODULE 7 : CENTRE D'EXERCICES, MICRO, CHRONO, FLASHCARDS & SRS
            ==================================================== -->
       <section id="view-practice" class="view-section">
         <div class="page-header">
-          <h1>4. Centre d'Exercices & Pratique Active</h1>
-          <p>Choisissez ce que vous voulez travailler : chaque question vous donne l'audio coréen et l'explication grammaticale complète.</p>
+          <h1>7. Centre d'Exercices, Prononciation Micro & Défi Chrono 🎯</h1>
+          <p>Choisissez votre mode d'entraînement actif : reconnaissance, écriture clavier, prononciation au micro ou lecture rapide.</p>
         </div>
 
-        <!-- Menu de sélection du mode d'exercice -->
         <div id="trainer-menu">
           <div class="trainer-modes-grid">
-            <div class="trainer-mode-card">
+
+            <!-- Mode SRS Points faibles & Favoris -->
+            <div class="trainer-mode-card" style="border-color:rgba(245, 158, 11, 0.5); background:linear-gradient(145deg, rgba(245, 158, 11, 0.08), var(--bg-surface));">
               <div>
-                <span class="level-badge">Niveau 1 • Alphabet</span>
-                <h3>Hangeul : Voyelles & Consonnes de base</h3>
-                <p>Reconnaissance audio (🔊 / 🐢) et lecture des 18 lettres fondamentales du Hangeul.</p>
+                <span class="level-badge" style="background:var(--accent-amber-soft); color:#fbbf24;">⭐ Révision Intelligente (SRS)</span>
+                <h3>Mes Points Faibles & Favoris</h3>
+                <p>Révisez uniquement les lettres et mots sur lesquels vous avez fait une erreur ou cliqué sur ⭐.</p>
+                <div id="trainer-weak-count-label" style="font-size:0.82rem; font-weight:700; color:#fbbf24; margin-top:6px;">0 élément(s) enregistré(s)</div>
               </div>
-              <button class="btn btn-primary" onclick="startPracticeSession('hangul_basic')">
-                Lancer (10 questions)
+              <button class="btn btn-amber" onclick="startPracticeSession('weak_review')">
+                Réviser mes points faibles
               </button>
             </div>
 
-            <div class="trainer-mode-card">
+            <!-- Mode Prononciation au Micro -->
+            <div class="trainer-mode-card" style="border-color:rgba(244, 63, 94, 0.5);">
               <div>
-                <span class="level-badge">Niveau 2 • Alphabet complet</span>
-                <h3>Hangeul Intégral (Doubles & Composées)</h3>
-                <p>Entraînement sur l'ensemble des 35 lettres incluant les voyelles en Y/W et consonnes aspirées/doubles.</p>
+                <span class="level-badge" style="background:var(--accent-rose-soft); color:#fb7185;">🎤 Expression Orale</span>
+                <h3>Testeur de Prononciation au Micro</h3>
+                <p>Parlez en coréen dans votre micro : le navigateur analyse votre prononciation et vérifie s'il vous comprend !</p>
               </div>
-              <button class="btn btn-primary" onclick="startPracticeSession('hangul_all')">
-                Lancer (10 questions)
+              <button class="btn btn-primary" style="background:var(--accent-rose);" onclick="startPracticeSession('mic_speaking')">
+                🎙️ Parler au micro
               </button>
             </div>
 
+            <!-- Mode Défi Lecture Chrono 60s -->
+            <div class="trainer-mode-card" style="border-color:rgba(16, 185, 129, 0.5);">
+              <div>
+                <span class="level-badge" style="background:var(--accent-emerald-soft); color:#34d399;">⚡ Vitesse de Lecture</span>
+                <h3>Sprint Lecture Chrono 60s</h3>
+                <p>Lisez un maximum de syllabes et de mots coréens en 60 secondes pour automatiser vos réflexes !</p>
+                <div id="trainer-sprint-best-label" style="font-size:0.82rem; font-weight:700; color:#34d399; margin-top:6px;">Record personnel : 0 pts</div>
+              </div>
+              <button class="btn btn-emerald" onclick="startSpeedSprint()">
+                ⚡ Lancer le Chrono 60s
+              </button>
+            </div>
+
+            <!-- Mode Flashcards Recto-Verso -->
             <div class="trainer-mode-card">
               <div>
-                <span class="level-badge">Niveau 3 • Grammaire</span>
-                <h3>Particules & Conjugaison au Présent</h3>
-                <p>Choisissez entre 이에요/예요, 을/를, 에/에서 et conjuguez les verbes en -아요/-어요 avec explication du pourquoi.</p>
+                <span class="level-badge">🃏 Mémorisation Active</span>
+                <h3>Flashcards Recto-Verso</h3>
+                <p>Retournez les cartes pour vérifier la prononciation et le sens, et triez entre « Connu » et « À revoir ».</p>
+              </div>
+              <button class="btn btn-primary" onclick="startFlashcards()">
+                🃏 Ouvrir 15 Flashcards
+              </button>
+            </div>
+
+            <!-- Mode Dictée Clavier Hangeul -->
+            <div class="trainer-mode-card">
+              <div>
+                <span class="level-badge">⌨️ Écriture Hangeul</span>
+                <h3>Dictée au Clavier Hangeul Virtuel</h3>
+                <p>Écoutez ou lisez un mot en français et tapez-le vous-même lettre par lettre sur le clavier coréen intégré !</p>
+              </div>
+              <button class="btn btn-primary" onclick="startPracticeSession('dictation')">
+                Lancer la Dictée Hangeul
+              </button>
+            </div>
+
+            <!-- Mode Conjugaison -->
+            <div class="trainer-mode-card">
+              <div>
+                <span class="level-badge">⚙️ Verbes & Temps</span>
+                <h3>Entraîneur de Conjugaison</h3>
+                <p>Passez de l'infinitif (-다) au Présent poli (-아요/어요), au Passé (-았/었어요), au Futur et à l'Envie (-고 싶어요).</p>
+              </div>
+              <button class="btn btn-emerald" onclick="startPracticeSession('conjugation')">
+                S'entraîner à conjuguer
+              </button>
+            </div>
+
+            <!-- Mode Grammaire & Particules -->
+            <div class="trainer-mode-card">
+              <div>
+                <span class="level-badge">📐 Particules & Connecteurs</span>
+                <h3>Grammaire : 이에요/예요, 을/를, 에/에서, -지만</h3>
+                <p>Complétez des phrases coréennes avec la bonne particule et comprenez pourquoi à chaque question.</p>
               </div>
               <button class="btn btn-emerald" onclick="startPracticeSession('grammar')">
-                Lancer l'entraînement Grammaire
+                Lancer le quiz Grammaire
               </button>
             </div>
 
+            <!-- Mode Construction de phrases S-O-V -->
             <div class="trainer-mode-card">
               <div>
-                <span class="level-badge">Niveau 4 • Syntaxe S-O-V</span>
-                <h3>Construction de Phrases Coréennes</h3>
-                <p>Assemblez des phrases complètes dans l'ordre coréen (Temps + Lieu + Objet + Verbe final).</p>
+                <span class="level-badge">🧩 Syntaxe S-O-V</span>
+                <h3>Construction de Phrases Complètes</h3>
+                <p>Assemblez les blocs dans l'ordre naturel coréen (Temps + Lieu + Objet + Verbe final).</p>
               </div>
               <button class="btn btn-emerald" onclick="startPracticeSession('sentences')">
                 Construire des phrases
               </button>
             </div>
 
+            <!-- Mode Hangeul Intégral -->
             <div class="trainer-mode-card">
               <div>
-                <span class="level-badge">Niveau 5 • Lexique</span>
-                <h3>Vocabulaire & Expressions de survie</h3>
-                <p>Testez votre mémoire sur les salutations, les verbes courants, les nombres et les mots du quotidien.</p>
+                <span class="level-badge">🔤 Alphabet Hangeul</span>
+                <h3>Quiz Hangeul (Bases ou Intégral)</h3>
+                <p>Reconnaissance audio et lecture phonétique des voyelles et consonnes coréennes.</p>
               </div>
-              <button class="btn btn-primary" onclick="startPracticeSession('vocab')">
-                Lancer le quiz Vocabulaire
-              </button>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="startPracticeSession('hangul_basic')">Bases (18)</button>
+                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="startPracticeSession('hangul_all')">Complet (35)</button>
+              </div>
             </div>
+
           </div>
         </div>
 
@@ -285,6 +614,35 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- ====================================================
+           MODULE 8 : FEUILLE DE ROUTE & CHECKLIST OBJECTIF NIVEAU 1 (A1)
+           ==================================================== -->
+      <section id="view-roadmap" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h1>8. Feuille de Route & Checklist Objectif Niveau 1 (A1) 🏆</h1>
+              <p>Cochez chaque étape au fur et à mesure de votre maîtrise, puis passez l'Examen Blanc Niveau 1 avant de passer au Niveau 2 !</p>
+            </div>
+            <button class="btn btn-amber" onclick="switchTab('practice'); startPracticeSession('exam_a1')">
+              🏆 Passer l'Examen Blanc Niveau 1 (12 questions)
+            </button>
+          </div>
+        </div>
+
+        <div class="rule-card" style="margin-bottom:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-weight:800; color:#34d399;">Progression Globale Niveau 1 (Fondations du Coréen)</span>
+            <span id="checklist-progress-label" style="font-size:0.88rem; font-weight:700; color:var(--text-secondary);">0 / 8 paliers validés (0%)</span>
+          </div>
+          <div class="progress-track" style="height:14px;">
+            <div class="progress-fill" id="checklist-progress-bar"></div>
+          </div>
+        </div>
+
+        <div id="checklist-items-container"></div>
       </section>
 
     </main>
