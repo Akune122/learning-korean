@@ -1,0 +1,12 @@
+{
+  "name": "learning-korean",
+  "version": "1.0.0",
+  "description": "Plateforme d'apprentissage du coréen (A1 & A2)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["korean", "hangeul", "learn-korean"],
+  "author": "",
+  "license": "MIT"
+}
