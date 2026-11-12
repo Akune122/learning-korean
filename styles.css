@@ -42,6 +42,11 @@ body {
   line-height: 1.5;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
 /* GESTION GLOBALE DU MODE ROMANISATION */
 body[data-roman="hover"] .roman-text,
 body[data-roman="hover"] .roman-tag,
@@ -1964,7 +1969,7 @@ body[data-roman="hidden"] .ex-roman {
 
 .rpg-choice-card {
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 14px 18px;
   cursor: pointer;
@@ -1973,6 +1978,20 @@ body[data-roman="hidden"] .ex-roman {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  color: var(--text-primary) !important;
+  font-family: inherit;
+}
+
+.rpg-opt-kr {
+  font-family: var(--font-kr);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f0f6fc !important;
+}
+
+.rpg-opt-fr {
+  font-size: 0.88rem;
+  color: #94a3b8 !important;
 }
 
 .rpg-choice-card:hover:not(:disabled) {
@@ -1981,14 +2000,26 @@ body[data-roman="hidden"] .ex-roman {
   transform: translateX(4px);
 }
 
+.rpg-choice-card:hover:not(:disabled) .rpg-opt-kr {
+  color: #60a5fa !important;
+}
+
 .rpg-choice-card.selected-correct {
-  background: rgba(16, 185, 129, 0.18);
-  border-color: var(--accent-emerald);
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: var(--accent-emerald) !important;
+}
+
+.rpg-choice-card.selected-correct .rpg-opt-kr {
+  color: #34d399 !important;
 }
 
 .rpg-choice-card.selected-wrong {
-  background: rgba(244, 63, 94, 0.18);
-  border-color: var(--accent-rose);
+  background: rgba(244, 63, 94, 0.2) !important;
+  border-color: var(--accent-rose) !important;
+}
+
+.rpg-choice-card.selected-wrong .rpg-opt-kr {
+  color: #fb7185 !important;
 }
 
 .rpg-feedback-box {
@@ -2112,6 +2143,40 @@ body[data-roman="hidden"] .ex-roman {
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.choice-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text-primary) !important;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  transition: all 0.18s ease;
+  display: block;
+  width: 100%;
+}
+
+.choice-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
+  color: #fff !important;
+}
+
+.choice-btn.correct {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: var(--accent-emerald) !important;
+  color: #34d399 !important;
+  font-weight: 700;
+}
+
+.choice-btn.wrong {
+  background: rgba(244, 63, 94, 0.2) !important;
+  border-color: var(--accent-rose) !important;
+  color: #fb7185 !important;
 }
 
 /* 6. Quêtes du Jour & Export Anki */

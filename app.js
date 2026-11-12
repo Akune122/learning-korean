@@ -2332,23 +2332,41 @@ function renderLevel2Grammar(filter = "all") {
   const pBody = document.getElementById("politeness-table-body");
   if (pBody && POLITENESS_COMPARISONS) {
     pBody.innerHTML = POLITENESS_COMPARISONS.map((p) => {
+      const conceptText = p.concept || p.meaning || "";
+      const frText = p.fr || "";
+      const banmalKr = (p.casual && p.casual.kr) || p.banmal || "";
+      const banmalRom = (p.casual && p.casual.roman) || "";
+      const haeyoKr = (p.polite && p.polite.kr) || p.haeyoche || "";
+      const haeyoRom = (p.polite && p.polite.roman) || "";
+      const formalKr = (p.formal && p.formal.kr) || p.hasipsioche || "";
+      const formalRom = (p.formal && p.formal.roman) || "";
+
       return `
         <tr>
           <td>
-            <strong>${p.concept}</strong><br>
-            <small style="color:var(--text-muted);">${p.fr}</small>
+            <strong style="color:var(--text-primary); font-size:0.95rem;">${conceptText}</strong>
+            ${frText ? `<br><small style="color:var(--text-muted);">${frText}</small>` : ""}
           </td>
           <td>
-            <span class="verb-kr" style="color:#f59e0b;">${p.banmal}</span>
-            <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem; margin-left:6px;" onclick="speakKorean('${escapeJsString(p.banmal)}', 0.88)">🔊</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="verb-kr" style="color:#f59e0b;">${banmalKr}</span>
+              <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem;" onclick="speakKorean('${escapeJsString(banmalKr)}', 0.88)">🔊</button>
+            </div>
+            ${banmalRom ? `<div class="ex-roman">${banmalRom}</div>` : ""}
           </td>
           <td>
-            <span class="verb-kr" style="color:#60a5fa;">${p.haeyoche}</span>
-            <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem; margin-left:6px;" onclick="speakKorean('${escapeJsString(p.haeyoche)}', 0.88)">🔊</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="verb-kr" style="color:#60a5fa;">${haeyoKr}</span>
+              <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem;" onclick="speakKorean('${escapeJsString(haeyoKr)}', 0.88)">🔊</button>
+            </div>
+            ${haeyoRom ? `<div class="ex-roman">${haeyoRom}</div>` : ""}
           </td>
           <td>
-            <span class="verb-kr" style="color:#34d399;">${p.hasipsioche}</span>
-            <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem; margin-left:6px;" onclick="speakKorean('${escapeJsString(p.hasipsioche)}', 0.88)">🔊</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="verb-kr" style="color:#34d399;">${formalKr}</span>
+              <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem;" onclick="speakKorean('${escapeJsString(formalKr)}', 0.88)">🔊</button>
+            </div>
+            ${formalRom ? `<div class="ex-roman">${formalRom}</div>` : ""}
           </td>
         </tr>
       `;
@@ -2575,9 +2593,17 @@ function renderRpgStep() {
 
   const choicesHtml = step.options
     .map((opt, optIdx) => {
+      let krText = opt.text;
+      let frText = "";
+      if (opt.text.includes("(") && opt.text.endsWith(")")) {
+        const parts = opt.text.split("(");
+        krText = parts[0].trim();
+        frText = parts.slice(1).join("(").replace(/\)$/, "").trim();
+      }
       return `
       <button class="rpg-choice-card" id="rpg-opt-${optIdx}" onclick="handleRpgChoice(${optIdx})">
-        <div style="font-family:var(--font-kr); font-size:1.15rem; font-weight:700;">${opt.text}</div>
+        <div class="rpg-opt-kr">${krText}</div>
+        ${frText ? `<div class="rpg-opt-fr">(${frText})</div>` : ""}
       </button>
     `;
     })
@@ -2749,9 +2775,17 @@ function renderActiveStory() {
     })
     .join("");
 
-  const quizHtml = (story.quiz || [])
+  const quizzes = !story.quiz
+    ? []
+    : Array.isArray(story.quiz)
+    ? story.quiz
+    : [story.quiz];
+
+  const quizHtml = quizzes
     .map((q, qIdx) => {
-      const opts = q.options
+      const qTitle = q.question || q.q || "Question de compréhension";
+      const optsList = q.options || q.opts || [];
+      const opts = optsList
         .map(
           (o, oIdx) => `
         <button class="choice-btn" id="squiz-${qIdx}-${oIdx}" onclick="answerStoryQuiz(${qIdx}, ${oIdx})">
@@ -2763,7 +2797,7 @@ function renderActiveStory() {
 
       return `
         <div class="rule-card" style="margin-top:16px;">
-          <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:10px;">❓ ${q.question}</h4>
+          <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:10px;">❓ ${qTitle}</h4>
           <div style="display:flex; flex-direction:column; gap:8px;">${opts}</div>
           <div class="feedback-banner" id="squiz-fb-${qIdx}" style="margin-top:8px;"></div>
         </div>
@@ -2853,14 +2887,20 @@ function inspectStoryToken(sentenceIdx, tokenIdx, playAudio = false) {
 
 function answerStoryQuiz(qIdx, oIdx) {
   const story = HOVER_STORIES[currentStoryIndex];
-  if (!story || !story.quiz || !story.quiz[qIdx]) return;
-  const q = story.quiz[qIdx];
-  const isCorrect = oIdx === q.correct;
+  if (!story || !story.quiz) return;
+  const quizzes = Array.isArray(story.quiz) ? story.quiz : [story.quiz];
+  const q = quizzes[qIdx];
+  if (!q) return;
 
-  q.options.forEach((_, idx) => {
+  const correctIndex = q.correct !== undefined ? q.correct : 0;
+  const isCorrect = oIdx === correctIndex;
+  const optsList = q.options || q.opts || [];
+  const explText = q.explanation || q.expl || "";
+
+  optsList.forEach((_, idx) => {
     const btn = document.getElementById(`squiz-${qIdx}-${idx}`);
     if (btn) {
-      if (idx === q.correct) btn.classList.add("correct");
+      if (idx === correctIndex) btn.classList.add("correct");
       if (idx === oIdx && !isCorrect) btn.classList.add("wrong");
     }
   });
@@ -2872,7 +2912,7 @@ function answerStoryQuiz(qIdx, oIdx) {
       <div style="font-weight:700; color:${isCorrect ? "#34d399" : "#fb7185"};">
         ${isCorrect ? "✅ Bravo, excellente compréhension !" : "❌ Mauvaise réponse, relisez bien la phrase."}
       </div>
-      <div style="font-size:0.86rem; color:var(--text-secondary); margin-top:2px;">${q.explanation}</div>
+      <div style="font-size:0.86rem; color:var(--text-secondary); margin-top:2px;">${explText}</div>
     `;
   }
   playFeedbackTone(isCorrect);

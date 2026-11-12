@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Ouvrir Coréen Essentiel (Fichier index.html)",
+      "file": "${workspaceFolder}/index.html"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Lancer sur http://localhost:8080 (npm start)",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}
