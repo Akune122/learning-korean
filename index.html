@@ -18,41 +18,97 @@
       </div>
     </div>
 
-    <div class="nav-group-label">Cours & Fondations</div>
-    <button class="nav-btn active" data-tab="hangul" onclick="switchTab('hangul')">
-      <span class="nav-btn-left"><span>🔤</span><span>1. Alphabet & Tracé</span></span>
-    </button>
+    <!-- SÉLECTEUR DE NIVEAU (A1 vs A2) -->
+    <div class="level-switcher-card">
+      <div class="level-switcher-header">
+        <span class="level-switcher-tag">PROGRESSION</span>
+        <span class="level-active-badge" id="level-active-badge">Niveau 1</span>
+      </div>
+      <div class="level-toggle-group">
+        <button id="level-btn-a1" class="level-switch-btn active" data-target-level="a1" onclick="switchLevel('a1')">
+          <span class="lvl-icon">🌱</span>
+          <span class="lvl-info">
+            <strong>Niveau 1</strong>
+            <small>Débutant · A1</small>
+          </span>
+        </button>
+        <button id="level-btn-a2" class="level-switch-btn" data-target-level="a2" onclick="switchLevel('a2')">
+          <span class="lvl-icon">🚀</span>
+          <span class="lvl-info">
+            <strong>Niveau 2</strong>
+            <small>Intermédiaire · A2</small>
+          </span>
+        </button>
+      </div>
+    </div>
 
-    <button class="nav-btn" data-tab="grammar" onclick="switchTab('grammar')">
-      <span class="nav-btn-left"><span>📐</span><span>2. Grammaire & Politesse</span></span>
-    </button>
+    <!-- NAVIGATION NIVEAU 1 : FONDATIONS A1 -->
+    <div id="nav-group-a1">
+      <div class="nav-group-label">Cours & Fondations A1</div>
+      <button class="nav-btn active" data-tab="hangul" onclick="switchTab('hangul')">
+        <span class="nav-btn-left"><span>🔤</span><span>1. Alphabet & Tracé</span></span>
+      </button>
 
-    <button class="nav-btn" data-tab="conjugation" onclick="switchTab('conjugation')">
-      <span class="nav-btn-left"><span>⚙️</span><span>3. Atelier Conjugaison</span></span>
-    </button>
+      <button class="nav-btn" data-tab="grammar" onclick="switchTab('grammar')">
+        <span class="nav-btn-left"><span>📐</span><span>2. Grammaire & Politesse</span></span>
+      </button>
 
-    <button class="nav-btn" data-tab="vocab" onclick="switchTab('vocab')">
-      <span class="nav-btn-left"><span>📚</span><span>4. Vocabulaire & Favoris</span></span>
-    </button>
+      <button class="nav-btn" data-tab="conjugation" onclick="switchTab('conjugation')">
+        <span class="nav-btn-left"><span>⚙️</span><span>3. Atelier Conjugaison</span></span>
+      </button>
 
-    <div class="nav-group-label">Mise en Situation</div>
-    <button class="nav-btn" data-tab="dialogues" onclick="switchTab('dialogues')">
-      <span class="nav-btn-left"><span>💬</span><span>5. Dialogues Réels</span></span>
-    </button>
+      <button class="nav-btn" data-tab="vocab" onclick="switchTab('vocab')">
+        <span class="nav-btn-left"><span>📚</span><span>4. Vocabulaire & Favoris</span></span>
+      </button>
 
-    <button class="nav-btn" data-tab="numbers" onclick="switchTab('numbers')">
-      <span class="nav-btn-left"><span>🕒</span><span>6. Heures, Prix & Nombres</span></span>
-    </button>
+      <div class="nav-group-label">Mise en Situation</div>
+      <button class="nav-btn" data-tab="dialogues" onclick="switchTab('dialogues')">
+        <span class="nav-btn-left"><span>💬</span><span>5. Dialogues Réels</span></span>
+      </button>
 
-    <div class="nav-group-label">Entraînement & Suivi</div>
-    <button class="nav-btn" data-tab="practice" onclick="switchTab('practice')">
-      <span class="nav-btn-left"><span>🎯</span><span>7. Exercices, Micro & Chrono</span></span>
-      <span class="nav-pill-count" id="nav-weak-pill" style="display:none;"></span>
-    </button>
+      <button class="nav-btn" data-tab="numbers" onclick="switchTab('numbers')">
+        <span class="nav-btn-left"><span>🕒</span><span>6. Heures, Prix & Nombres</span></span>
+      </button>
 
-    <button class="nav-btn" data-tab="roadmap" onclick="switchTab('roadmap')">
-      <span class="nav-btn-left"><span>🏆</span><span>8. Objectif Niveau 1 (A1)</span></span>
-    </button>
+      <div class="nav-group-label">Entraînement & Suivi</div>
+      <button class="nav-btn" data-tab="practice" onclick="switchTab('practice')">
+        <span class="nav-btn-left"><span>🎯</span><span>7. Exercices, Micro & Chrono</span></span>
+        <span class="nav-pill-count" id="nav-weak-pill" style="display:none;"></span>
+      </button>
+
+      <button class="nav-btn" data-tab="roadmap" onclick="switchTab('roadmap')">
+        <span class="nav-btn-left"><span>🏆</span><span>8. Objectif Niveau 1 (A1)</span></span>
+      </button>
+    </div>
+
+    <!-- NAVIGATION NIVEAU 2 : INTERMÉDIAIRE A2 -->
+    <div id="nav-group-a2" style="display:none;">
+      <div class="nav-group-label">Grammaire & Racines A2</div>
+      <button class="nav-btn" data-tab="grammar_a2" onclick="switchTab('grammar_a2')">
+        <span class="nav-btn-left"><span>⚡</span><span>1. Grammaire Essentielle A2</span></span>
+      </button>
+
+      <button class="nav-btn" data-tab="irregulars" onclick="switchTab('irregulars')">
+        <span class="nav-btn-left"><span>🧩</span><span>2. Verbes Irréguliers (5 pièges)</span></span>
+      </button>
+
+      <button class="nav-btn" data-tab="hanja" onclick="switchTab('hanja')">
+        <span class="nav-btn-left"><span>🏮</span><span>3. Explorateur Hanja (Racines)</span></span>
+      </button>
+
+      <div class="nav-group-label">Immersion & Quotidien</div>
+      <button class="nav-btn" data-tab="rpg" onclick="switchTab('rpg')">
+        <span class="nav-btn-left"><span>🎮</span><span>4. RPG & Aventures à Séoul</span></span>
+      </button>
+
+      <button class="nav-btn" data-tab="stories" onclick="switchTab('stories')">
+        <span class="nav-btn-left"><span>📖</span><span>5. Histoires & Survol Magique</span></span>
+      </button>
+
+      <button class="nav-btn" data-tab="daily_anki" onclick="switchTab('daily_anki')">
+        <span class="nav-btn-left"><span>⭐</span><span>6. Quêtes du Jour & Export Anki</span></span>
+      </button>
+    </div>
 
     <div class="sidebar-footer">
       <div class="voice-status">
@@ -69,6 +125,13 @@
   <!-- CONTENU PRINCIPAL -->
   <div class="main-wrapper">
     <header class="topbar">
+      <!-- Indicateur de niveau actif -->
+      <div class="level-indicator-pill" id="topbar-level-indicator">
+        <span id="topbar-level-icon">🌱</span>
+        <span id="topbar-level-text">Niveau 1 : Fondations A1</span>
+        <button class="level-switch-quick" onclick="toggleLevel()">Basculer A1 ⇄ A2</button>
+      </div>
+
       <!-- Switch Global Romanisation -->
       <div class="roman-switcher" title="Masquez la romanisation dès que possible pour forcer votre œil à lire le Hangeul !">
         <span class="roman-switcher-label">🙈 Romanisation :</span>
@@ -643,6 +706,252 @@
         </div>
 
         <div id="checklist-items-container"></div>
+
+        <!-- PONT VERS LE NIVEAU 2 -->
+        <div class="rule-card" style="margin-top:28px; background:linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.1)); border-color:var(--accent-purple);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div>
+              <span class="level-badge" style="background:var(--accent-purple-soft); color:#c084fc;">PROCHAINE ÉTAPE</span>
+              <h2 style="font-size:1.35rem; font-weight:800; margin:6px 0 4px;">Prêt à franchir le cap vers le Niveau 2 (A2) ?</h2>
+              <p style="color:var(--text-secondary); max-width:640px;">
+                Débloquez les verbes irréguliers (ㄷ, ㅂ, ㅅ...), les racines Hanja pour mémoriser le vocabulaire, les aventures RPG immersives à Séoul et le lecteur d'histoires avec survol magique !
+              </p>
+            </div>
+            <button class="btn btn-primary" style="background:linear-gradient(135deg, var(--accent-purple), var(--accent-rose)); font-size:1rem; padding:12px 22px;" onclick="switchLevel('a2')">
+              🚀 Passer au Niveau 2 (A2) →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           MODULE A2-1 : GRAMMAIRE ESSENTIELLE A2 & POLITESSE
+           ==================================================== -->
+      <section id="view-grammar_a2" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span class="level-badge" style="background:var(--accent-purple-soft); color:#c084fc;">NIVEAU 2 · A2</span>
+                <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">Progression Intermédiaire</span>
+              </div>
+              <h1>1. Grammaire Essentielle A2 & Registres de Politesse ⚡</h1>
+              <p>Capacité (pouvoir), obligation (devoir), action en cours (être en train de), impératif et cause.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="switchLevel('a1')">
+              ← Revenir au Niveau 1
+            </button>
+          </div>
+        </div>
+
+        <div class="subtabs" id="grammar-a2-subtabs">
+          <button class="subtab-btn active" data-sub="all" onclick="filterGrammarA2('all')">Toutes les règles (6)</button>
+          <button class="subtab-btn" data-sub="ability" onclick="filterGrammarA2('ability')">Capacité (ㄹ 수 있다)</button>
+          <button class="subtab-btn" data-sub="obligation" onclick="filterGrammarA2('obligation')">Obligation (아야 되다)</button>
+          <button class="subtab-btn" data-sub="continuous" onclick="filterGrammarA2('continuous')">En cours (-고 있다)</button>
+          <button class="subtab-btn" data-sub="politeness" onclick="filterGrammarA2('politeness')">Matrice de Politesse</button>
+        </div>
+
+        <div id="grammar-a2-cards-container" class="grammar-a2-grid"></div>
+
+        <!-- Matrice de politesse comparative -->
+        <div id="grammar-a2-politeness-section" class="rule-card" style="margin-top:24px;">
+          <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:6px;">Matrice Comparative des 3 Grands Registres Coréens</h2>
+          <p style="color:var(--text-secondary); margin-bottom:14px;">
+            En Corée, choisir le bon registre définit votre relation avec votre interlocuteur. Voici comment les mêmes idées s'expriment selon le contexte :
+          </p>
+          <div class="politeness-table-wrapper">
+            <table class="politeness-table">
+              <thead>
+                <tr>
+                  <th>Concept / Situation</th>
+                  <th>Familier (반말 - Banmal)</th>
+                  <th>Poli Courant (해요체 - Haeyoche)</th>
+                  <th>Formel / Respectueux (하십시오체)</th>
+                </tr>
+              </thead>
+              <tbody id="politeness-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           MODULE A2-2 : ATELIER DES VERBES IRRÉGULIERS
+           ==================================================== -->
+      <section id="view-irregulars" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span class="level-badge" style="background:var(--accent-rose-soft); color:#fb7185;">NIVEAU 2 · A2</span>
+                <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">Les 5 Pièges Majeurs</span>
+              </div>
+              <h1>2. L'Atelier des Verbes Irréguliers (불규칙) 🧩</h1>
+              <p>Comprenez enfin pourquoi ㄷ, ㅂ, ㅅ, ㅡ et 르 changent de forme devant les voyelles coréennes !</p>
+            </div>
+            <button class="btn btn-secondary" onclick="switchLevel('a1')">
+              ← Revenir au Niveau 1
+            </button>
+          </div>
+        </div>
+
+        <div class="rule-card" style="margin-bottom:20px; border-left:4px solid var(--accent-rose);">
+          <h3 style="color:#fb7185; margin-bottom:6px;">💡 La règle d'or pour dompter les irréguliers</h3>
+          <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.5;">
+            Les verbes coréens ne deviennent irréguliers <strong>que lorsqu'ils rencontrent une terminaison commençant par une voyelle</strong> (ex: <code style="color:#34d399;">-아요/어요</code>, <code style="color:#34d399;">-았/었어요</code>, <code style="color:#34d399;">-(으)면</code>). Devant une consonne (comme <code style="color:#60a5fa;">-고</code> ou <code style="color:#60a5fa;">-지만</code>), ils restent réguliers à 100% !
+          </p>
+        </div>
+
+        <div id="irregulars-container" class="irregulars-grid"></div>
+      </section>
+
+      <!-- ====================================================
+           MODULE A2-3 : EXPLORATEUR DE RACINES HANJA
+           ==================================================== -->
+      <section id="view-hanja" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span class="level-badge" style="background:var(--accent-amber-soft); color:#fbbf24;">NIVEAU 2 · A2</span>
+                <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">Super-Pouvoir de Mémorisation</span>
+              </div>
+              <h1>3. Explorateur de Racines Hanja (한자) 🏮</h1>
+              <p>Plus de 60% du vocabulaire coréen provient des caractères chinois. Une seule racine vous offre 10 mots d'un coup !</p>
+            </div>
+            <button class="btn btn-secondary" onclick="switchLevel('a1')">
+              ← Revenir au Niveau 1
+            </button>
+          </div>
+        </div>
+
+        <div class="hanja-roots-selector" id="hanja-roots-selector"></div>
+
+        <div id="hanja-active-hero"></div>
+
+        <div style="margin-top:20px;">
+          <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">Mots formés avec cette racine :</h3>
+          <div class="hanja-words-grid" id="hanja-words-container"></div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           MODULE A2-4 : RPG & AVENTURES TEXTUELLES À SÉOUL
+           ==================================================== -->
+      <section id="view-rpg" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span class="level-badge" style="background:var(--accent-emerald-soft); color:#34d399;">NIVEAU 2 · A2</span>
+                <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">Immersion Interactive</span>
+              </div>
+              <h1>4. RPG & Aventures à Séoul (서울 모험) 🎮</h1>
+              <p>Faites les bons choix de politesse dans des situations de la vie réelle et gagnez des points d'étiquette coréenne !</p>
+            </div>
+            <button class="btn btn-secondary" onclick="switchLevel('a1')">
+              ← Revenir au Niveau 1
+            </button>
+          </div>
+        </div>
+
+        <div class="rpg-selector-tabs" id="rpg-quests-selector"></div>
+
+        <div class="rpg-arena" id="rpg-active-arena"></div>
+      </section>
+
+      <!-- ====================================================
+           MODULE A2-5 : LECTEUR D'HISTOIRES AVEC SURVOL MAGIQUE
+           ==================================================== -->
+      <section id="view-stories" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span class="level-badge" style="background:var(--accent-primary-soft); color:#60a5fa;">NIVEAU 2 · A2</span>
+                <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">Compréhension Écrite & Orale</span>
+              </div>
+              <h1>5. Lecteur d'Histoires Bilingue & Survol Magique 📖</h1>
+              <p>Lisez de vrais textes coréens. Cliquez ou survolez chaque mot pour décomposer son rôle grammatical précis et son sens !</p>
+            </div>
+            <button class="btn btn-secondary" onclick="switchLevel('a1')">
+              ← Revenir au Niveau 1
+            </button>
+          </div>
+        </div>
+
+        <div class="story-selector-row" id="story-selector-row"></div>
+
+        <div class="story-reader-box" id="story-active-reader"></div>
+      </section>
+
+      <!-- ====================================================
+           MODULE A2-6 : QUÊTES DU JOUR & EXPORT ANKI
+           ==================================================== -->
+      <section id="view-daily_anki" class="view-section">
+        <div class="page-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span class="level-badge" style="background:var(--accent-amber-soft); color:#fbbf24;">NIVEAU 2 · A2</span>
+                <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">Routine Quotidienne & Outils</span>
+              </div>
+              <h1>6. Quêtes du Jour & Exportation Anki (.CSV) ⭐</h1>
+              <p>Gardez le rythme chaque jour et synchronisez votre vocabulaire personnel avec Anki pour ne plus jamais rien oublier.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="switchLevel('a1')">
+              ← Revenir au Niveau 1
+            </button>
+          </div>
+        </div>
+
+        <div class="quests-and-anki-grid">
+          <!-- Bloc Quêtes Quotidiennes -->
+          <div class="daily-quests-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <div>
+                <h2 style="font-size:1.3rem; font-weight:800;">Quêtes Quotidiennes</h2>
+                <div style="font-size:0.82rem; color:var(--text-secondary);" id="daily-quest-date-label">Aujourd'hui</div>
+              </div>
+              <div style="text-align:right;">
+                <span style="font-size:1.1rem; font-weight:800; color:var(--accent-amber);" id="daily-xp-total">0 XP</span>
+              </div>
+            </div>
+
+            <div id="daily-quests-container"></div>
+          </div>
+
+          <!-- Bloc Export Anki -->
+          <div class="anki-export-box">
+            <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:8px;">Exportateur de Decks Anki (.CSV)</h2>
+            <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.5; margin-bottom:16px;">
+              Téléchargez vos cartes au format CSV universel pour les réviser sur Anki Desktop, AnkiMobile (iOS) ou AnkiDroid.
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+              <button class="btn btn-primary" style="justify-content:center; padding:12px;" onclick="exportAnkiCsv('weak_and_favs')">
+                ⭐ Exporter mes Favoris & Points Faibles (<span id="anki-fav-count">0</span> mots)
+              </button>
+              <button class="btn btn-secondary" style="justify-content:center; padding:12px;" onclick="exportAnkiCsv('all_vocab')">
+                📚 Exporter tout le Vocabulaire (A1 + A2)
+              </button>
+              <button class="btn btn-secondary" style="justify-content:center; padding:12px;" onclick="exportAnkiCsv('hanja')">
+                🏮 Exporter les Racines Hanja & Mots Dérivés
+              </button>
+            </div>
+
+            <div class="rule-card" style="background:var(--bg-elevated); border:1px solid var(--border);">
+              <h4 style="font-size:0.85rem; font-weight:800; margin-bottom:4px; color:#34d399;">💡 Comment importer dans Anki ?</h4>
+              <ol style="font-size:0.8rem; color:var(--text-secondary); padding-left:18px; line-height:1.45;">
+                <li>Cliquez sur un des boutons d'export ci-dessus pour télécharger le fichier <code>.csv</code>.</li>
+                <li>Ouvrez Anki, cliquez sur <strong>Fichier → Importer</strong>.</li>
+                <li>Sélectionnez le fichier téléchargé (séparateur virgule/point-virgule, UTF-8).</li>
+                <li>Vos cartes recto (Hangeul) / verso (Prononciation + Français) sont prêtes !</li>
+              </ol>
+            </div>
+          </div>
+        </div>
       </section>
 
     </main>

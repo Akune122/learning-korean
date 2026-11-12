@@ -9,9 +9,15 @@ let userState = {
   correctAnswers: 0,
   bestSprintScore: 0,
   romanMode: "visible", // 'visible' | 'hover' | 'hidden'
+  currentLevel: "a1",   // 'a1' | 'a2'
   bookmarkedIds: [],    // IDs marqués d'une étoile ⭐
   weakIds: [],          // IDs où l'utilisateur s'est trompé
-  checkedMilestones: [] // Paliers de la Checklist Niveau 1 validés
+  checkedMilestones: [], // Paliers de la Checklist Niveau 1 validés
+  dailyQuests: {
+    date: "",
+    completedIds: [],
+    xp: 0
+  }
 };
 
 const ALL_HANGUL_MAP = {};
@@ -149,6 +155,7 @@ function loadState() {
     }
   } catch (e) {}
   applyRomanMode(userState.romanMode || "visible");
+  switchLevel(userState.currentLevel || "a1", false);
   updateStatsHeader();
 }
 
@@ -213,11 +220,13 @@ function updateStatsHeader() {
   const elPracticePill = document.getElementById("nav-weak-pill");
   const elWeakCardCount = document.getElementById("trainer-weak-count-label");
   const elSprintBest = document.getElementById("trainer-sprint-best-label");
+  const elAnkiFav = document.getElementById("anki-fav-count");
 
   const reviewCount = getReviewPoolIds().length;
   if (elEx) elEx.textContent = userState.completedExercises;
   if (elAns) elAns.textContent = userState.correctAnswers;
   if (elWeakCount) elWeakCount.textContent = reviewCount;
+  if (elAnkiFav) elAnkiFav.textContent = reviewCount;
   if (elPracticePill) {
     elPracticePill.textContent = reviewCount > 0 ? `${reviewCount} à revoir` : "";
     elPracticePill.style.display = reviewCount > 0 ? "inline-block" : "none";
@@ -230,8 +239,55 @@ function updateStatsHeader() {
   }
 }
 
+function switchLevel(lvl, navigateToDefault = true) {
+  userState.currentLevel = lvl;
+
+  // Toggle active buttons in sidebar
+  const btnA1 = document.getElementById("level-btn-a1");
+  const btnA2 = document.getElementById("level-btn-a2");
+  if (btnA1) btnA1.classList.toggle("active", lvl === "a1");
+  if (btnA2) btnA2.classList.toggle("active", lvl === "a2");
+
+  // Toggle nav groups
+  const navA1 = document.getElementById("nav-group-a1");
+  const navA2 = document.getElementById("nav-group-a2");
+  if (navA1) navA1.style.display = lvl === "a1" ? "block" : "none";
+  if (navA2) navA2.style.display = lvl === "a2" ? "block" : "none";
+
+  // Update badges & indicators
+  const badge = document.getElementById("level-active-badge");
+  if (badge) {
+    badge.textContent = lvl === "a1" ? "Niveau 1" : "Niveau 2";
+    badge.style.color = lvl === "a1" ? "#60a5fa" : "#c084fc";
+  }
+
+  const topIcon = document.getElementById("topbar-level-icon");
+  const topText = document.getElementById("topbar-level-text");
+  if (topIcon) topIcon.textContent = lvl === "a1" ? "🌱" : "🚀";
+  if (topText) topText.textContent = lvl === "a1" ? "Niveau 1 : Fondations A1" : "Niveau 2 : Intermédiaire A2";
+
+  saveState();
+
+  if (navigateToDefault) {
+    switchTab(lvl === "a1" ? "hangul" : "grammar_a2");
+  }
+}
+
+function toggleLevel() {
+  const next = userState.currentLevel === "a2" ? "a1" : "a2";
+  switchLevel(next, true);
+}
+
 function switchTab(tabId) {
   if (sprintInterval) clearInterval(sprintInterval);
+
+  // Sync active level if tab belongs to A1 or A2
+  const a2Tabs = ["grammar_a2", "irregulars", "hanja", "rpg", "stories", "daily_anki"];
+  const targetLevel = a2Tabs.includes(tabId) ? "a2" : "a1";
+  if (userState.currentLevel !== targetLevel) {
+    switchLevel(targetLevel, false);
+  }
+
   document.querySelectorAll(".nav-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.tab === tabId);
   });
@@ -2177,6 +2233,822 @@ function renderTrainerSummary() {
   }, 100);
 }
 
+// ==========================================
+// 10. UTILITAIRES & MODULES DU NIVEAU 2 (A2)
+// ==========================================
+
+function escapeJsString(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, " ");
+}
+
+// ------------------------------------------
+// MODULE A2-1 : GRAMMAIRE A2 & POLITESSE
+// ------------------------------------------
+function filterGrammarA2(subId) {
+  document.querySelectorAll("#grammar-a2-subtabs .subtab-btn").forEach((b) => {
+    b.classList.toggle("active", b.dataset.sub === subId);
+  });
+  renderLevel2Grammar(subId);
+  if (subId === "politeness") {
+    const el = document.getElementById("grammar-a2-politeness-section");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+function renderLevel2Grammar(filter = "all") {
+  const container = document.getElementById("grammar-a2-cards-container");
+  if (!container || !LEVEL2_GRAMMAR) return;
+
+  let items = LEVEL2_GRAMMAR;
+  if (filter === "ability") items = items.filter((g) => g.id === "l2_g1");
+  else if (filter === "obligation") items = items.filter((g) => g.id === "l2_g2");
+  else if (filter === "continuous") items = items.filter((g) => g.id === "l2_g3");
+
+  container.innerHTML = items
+    .map((g) => {
+      const keyPointsHtml = (g.keyPoints || [])
+        .map((kp) => `<li>${kp}</li>`)
+        .join("");
+
+      const examplesHtml = (g.examples || [])
+        .map((ex) => {
+          return `
+          <div class="ex-item-card" style="margin-bottom:8px;">
+            <div class="ex-head">
+              <div class="ex-kr">${ex.kr}</div>
+              <div class="ex-actions">
+                <button class="audio-btn-circle" title="Vitesse normale" onclick="speakKorean('${escapeJsString(ex.kr)}', 0.88)">🔊</button>
+                <button class="audio-btn-circle audio-slow-btn" title="Vitesse lente" onclick="speakKorean('${escapeJsString(ex.kr)}', 0.6)">🐢</button>
+              </div>
+            </div>
+            <div class="ex-roman">${ex.roman}</div>
+            <div class="ex-fr">${ex.fr}</div>
+          </div>
+        `;
+        })
+        .join("");
+
+      return `
+        <div class="grammar-card-a2">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
+            <div>
+              <span class="level-badge" style="background:var(--accent-purple-soft); color:#c084fc;">${g.level || "Niveau A2"}</span>
+              <h2 style="font-size:1.35rem; font-weight:800; margin-top:6px;">${g.title}</h2>
+              <p style="color:var(--text-secondary); font-size:0.92rem;">${g.subtitle}</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="speakKorean('${escapeJsString(g.title.split('—')[0].trim())}', 0.85)">🔊 Audio Règle</button>
+          </div>
+
+          <div class="formula-banner">
+            <div class="formula-title">Formule & Construction</div>
+            <div class="formula-body">${g.formula}</div>
+          </div>
+
+          <p style="color:var(--text-primary); font-size:0.93rem; line-height:1.55; margin-bottom:12px;">${g.explanation}</p>
+
+          <ul class="keypoints-list">
+            ${keyPointsHtml}
+          </ul>
+
+          <div style="margin-top:16px;">
+            <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--text-secondary); margin-bottom:10px;">
+              Exemples d'application en contexte :
+            </div>
+            <div class="examples-list">
+              ${examplesHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  // Politeness Table
+  const pBody = document.getElementById("politeness-table-body");
+  if (pBody && POLITENESS_COMPARISONS) {
+    pBody.innerHTML = POLITENESS_COMPARISONS.map((p) => {
+      return `
+        <tr>
+          <td>
+            <strong>${p.concept}</strong><br>
+            <small style="color:var(--text-muted);">${p.fr}</small>
+          </td>
+          <td>
+            <span class="verb-kr" style="color:#f59e0b;">${p.banmal}</span>
+            <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem; margin-left:6px;" onclick="speakKorean('${escapeJsString(p.banmal)}', 0.88)">🔊</button>
+          </td>
+          <td>
+            <span class="verb-kr" style="color:#60a5fa;">${p.haeyoche}</span>
+            <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem; margin-left:6px;" onclick="speakKorean('${escapeJsString(p.haeyoche)}', 0.88)">🔊</button>
+          </td>
+          <td>
+            <span class="verb-kr" style="color:#34d399;">${p.hasipsioche}</span>
+            <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem; margin-left:6px;" onclick="speakKorean('${escapeJsString(p.hasipsioche)}', 0.88)">🔊</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+}
+
+// ------------------------------------------
+// MODULE A2-2 : ATELIER DES VERBES IRRÉGULIERS
+// ------------------------------------------
+function renderIrregularsModule() {
+  const container = document.getElementById("irregulars-container");
+  if (!container || !IRREGULAR_VERBS) return;
+
+  container.innerHTML = IRREGULAR_VERBS.map((irreg) => {
+    const rowsHtml = irreg.verbs
+      .map((v) => {
+        return `
+        <tr>
+          <td>
+            <span class="verb-kr">${v.infinitive}</span>
+            <div class="ex-roman">${v.roman}</div>
+          </td>
+          <td>
+            <span class="verb-kr verb-hl">${v.present}</span>
+            <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem; margin-left:4px;" onclick="speakKorean('${escapeJsString(v.present)}', 0.88)">🔊</button>
+          </td>
+          <td>
+            <span class="verb-kr" style="color:#60a5fa;">${v.past}</span>
+            <button class="audio-btn-circle" style="width:24px; height:24px; font-size:0.7rem; margin-left:4px;" onclick="speakKorean('${escapeJsString(v.past)}', 0.88)">🔊</button>
+          </td>
+          <td>
+            <div style="font-weight:600; color:var(--text-primary);">${v.fr}</div>
+            ${v.note ? `<div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">${v.note}</div>` : ""}
+          </td>
+        </tr>
+      `;
+      })
+      .join("");
+
+    return `
+      <div class="irregular-card">
+        <div class="irregular-badge-row">
+          <div class="irregular-char-badge">${irreg.type.slice(0, 1)}</div>
+          <div>
+            <h2 style="font-size:1.25rem; font-weight:800; margin-bottom:2px;">${irreg.type}</h2>
+            <div style="font-size:0.82rem; color:var(--text-muted);">Transformation phonétique essentielle</div>
+          </div>
+        </div>
+
+        <div class="irregular-rule-box">
+          ${irreg.rule}
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="verbs-table">
+            <thead>
+              <tr>
+                <th>Infinitif</th>
+                <th>Présent (-아요/어요)</th>
+                <th>Passé (-았/었어요)</th>
+                <th>Traduction & Remarques</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ------------------------------------------
+// MODULE A2-3 : EXPLORATEUR DE RACINES HANJA
+// ------------------------------------------
+let currentHanjaIndex = 0;
+
+function renderHanjaModule() {
+  if (!HANJA_ROOTS || HANJA_ROOTS.length === 0) return;
+
+  const selector = document.getElementById("hanja-roots-selector");
+  if (selector) {
+    selector.innerHTML = HANJA_ROOTS.map((root, idx) => {
+      const activeClass = idx === currentHanjaIndex ? "active" : "";
+      return `
+        <button class="hanja-root-btn ${activeClass}" onclick="selectHanjaRoot(${idx})">
+          <span class="hanja-char-big">${root.hanja}</span>
+          <div style="text-align:left; line-height:1.2;">
+            <div style="font-weight:700; font-size:0.88rem;">${root.hangul} (${root.roman})</div>
+            <div style="font-size:0.72rem; color:var(--text-secondary);">${root.meaning}</div>
+          </div>
+        </button>
+      `;
+    }).join("");
+  }
+
+  const current = HANJA_ROOTS[currentHanjaIndex];
+  if (!current) return;
+
+  const hero = document.getElementById("hanja-active-hero");
+  if (hero) {
+    hero.innerHTML = `
+      <div class="hanja-hero-card">
+        <div class="hanja-hero-char">${current.hanja}</div>
+        <div class="hanja-hero-info">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+            <h2>${current.hangul} [${current.roman}] — ${current.meaning}</h2>
+            <button class="audio-btn-circle" onclick="speakKorean('${escapeJsString(current.hangul)}', 0.88)">🔊</button>
+          </div>
+          <div class="hanja-hero-mnemonic">
+            💡 <strong>Astuce mnémotechnique :</strong> ${current.mnemonic}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const wordsContainer = document.getElementById("hanja-words-container");
+  if (wordsContainer) {
+    wordsContainer.innerHTML = current.words
+      .map((w) => {
+        return `
+        <div class="hanja-word-card">
+          <div class="hanja-word-head">
+            <div>
+              <div class="hanja-word-kr">${w.kr}</div>
+              <div class="ex-roman">${w.roman}</div>
+            </div>
+            <button class="audio-btn-circle" onclick="speakKorean('${escapeJsString(w.kr)}', 0.88)">🔊</button>
+          </div>
+          <div class="hanja-word-breakdown">
+            🧩 ${w.breakdown}
+          </div>
+          <div class="hanja-word-meaning">${w.fr}</div>
+        </div>
+      `;
+      })
+      .join("");
+  }
+}
+
+function selectHanjaRoot(idx) {
+  currentHanjaIndex = idx;
+  renderHanjaModule();
+  const current = HANJA_ROOTS[idx];
+  if (current) speakKorean(current.hangul, 0.88);
+}
+
+// ------------------------------------------
+// MODULE A2-4 : RPG & AVENTURES À SÉOUL
+// ------------------------------------------
+let currentRpgQuestIndex = 0;
+let currentRpgStepIndex = 0;
+let currentRpgScore = 0;
+let rpgStepAnswered = false;
+
+function renderRpgModule() {
+  if (!SEOUL_QUESTS || SEOUL_QUESTS.length === 0) return;
+
+  const selector = document.getElementById("rpg-quests-selector");
+  if (selector) {
+    selector.innerHTML = SEOUL_QUESTS.map((q, idx) => {
+      const activeClass = idx === currentRpgQuestIndex ? "active" : "";
+      return `
+        <button class="rpg-tab-btn ${activeClass}" onclick="initRpgQuest(${idx})">
+          <span style="font-size:1.8rem;">${q.avatar || "🇰🇷"}</span>
+          <div style="text-align:left;">
+            <div style="font-weight:800; font-size:0.92rem;">${q.title}</div>
+            <div style="font-size:0.75rem; color:var(--text-secondary);">${q.place}</div>
+          </div>
+        </button>
+      `;
+    }).join("");
+  }
+
+  renderRpgStep();
+}
+
+function initRpgQuest(questIdx) {
+  currentRpgQuestIndex = questIdx;
+  currentRpgStepIndex = 0;
+  currentRpgScore = 0;
+  rpgStepAnswered = false;
+  renderRpgModule();
+}
+
+function renderRpgStep() {
+  const arena = document.getElementById("rpg-active-arena");
+  const quest = SEOUL_QUESTS[currentRpgQuestIndex];
+  if (!arena || !quest) return;
+
+  const steps = quest.steps || [];
+  if (currentRpgStepIndex >= steps.length) {
+    // End of quest summary
+    const maxScore = steps.length * 10;
+    const isMaster = currentRpgScore >= maxScore * 0.7;
+    arena.innerHTML = `
+      <div style="text-align:center; padding:28px 12px;">
+        <div style="font-size:3.5rem; margin-bottom:12px;">${isMaster ? "🎉" : "💪"}</div>
+        <h2 style="font-size:1.6rem; font-weight:800; margin-bottom:6px;">
+          ${isMaster ? "Aventure réussie avec brio !" : "Bonne tentative !"}
+        </h2>
+        <p style="color:var(--text-secondary); margin-bottom:16px;">
+          Votre score d'étiquette coréenne : <strong style="color:var(--accent-emerald); font-size:1.2rem;">${currentRpgScore} / ${maxScore} pts</strong>
+        </p>
+        <p style="font-size:0.92rem; color:var(--text-muted); max-width:540px; margin:0 auto 24px;">
+          ${isMaster
+            ? "Félicitations ! Vous avez su utiliser les formules de politesse adaptées et respecter les coutumes de Séoul."
+            : "N'hésitez pas à recommencer pour mémoriser les formules les plus naturelles et polies."}
+        </p>
+        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="initRpgQuest(${currentRpgQuestIndex})">🔄 Rejouer cette situation</button>
+          <button class="btn btn-secondary" onclick="initRpgQuest(${(currentRpgQuestIndex + 1) % SEOUL_QUESTS.length})">Aventure suivante →</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const step = steps[currentRpgStepIndex];
+  rpgStepAnswered = false;
+
+  const choicesHtml = step.options
+    .map((opt, optIdx) => {
+      return `
+      <button class="rpg-choice-card" id="rpg-opt-${optIdx}" onclick="handleRpgChoice(${optIdx})">
+        <div style="font-family:var(--font-kr); font-size:1.15rem; font-weight:700;">${opt.text}</div>
+      </button>
+    `;
+    })
+    .join("");
+
+  arena.innerHTML = `
+    <div class="rpg-header-bar">
+      <div>
+        <span class="level-badge" style="background:var(--accent-emerald-soft); color:#34d399;">${quest.place}</span>
+        <h3 style="font-size:1.2rem; font-weight:800; margin-top:4px;">${quest.title}</h3>
+      </div>
+      <div style="text-align:right;">
+        <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:700;">Étape ${currentRpgStepIndex + 1} / ${steps.length}</span>
+        <div style="font-size:0.88rem; color:var(--accent-emerald); font-weight:800;" id="rpg-live-score">Score : ${currentRpgScore} pts</div>
+      </div>
+    </div>
+
+    <div class="rpg-npc-container">
+      <div class="rpg-npc-avatar">${quest.avatar || "👤"}</div>
+      <div class="rpg-npc-bubble">
+        <div class="rpg-npc-name">${quest.npc}</div>
+        <div class="rpg-npc-line">${step.npcSay}</div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:6px; font-size:0.75rem;" onclick="speakKorean('${escapeJsString(step.npcSay.split('(')[0].trim())}', 0.88)">
+          🔊 Écouter
+        </button>
+      </div>
+    </div>
+
+    <div style="margin:18px 0 10px;">
+      <h4 style="font-size:1rem; font-weight:700; color:var(--text-primary); margin-bottom:12px;">👉 ${step.prompt}</h4>
+      <div class="rpg-choices-list" id="rpg-choices-box">
+        ${choicesHtml}
+      </div>
+    </div>
+
+    <div class="rpg-feedback-box" id="rpg-step-feedback"></div>
+  `;
+}
+
+function handleRpgChoice(choiceIdx) {
+  if (rpgStepAnswered) return;
+  rpgStepAnswered = true;
+
+  const quest = SEOUL_QUESTS[currentRpgQuestIndex];
+  const step = quest.steps[currentRpgStepIndex];
+  const chosen = step.options[choiceIdx];
+
+  const optBtn = document.getElementById(`rpg-opt-${choiceIdx}`);
+  if (optBtn) {
+    optBtn.classList.add(chosen.correct ? "selected-correct" : "selected-wrong");
+  }
+
+  // Disable other buttons
+  step.options.forEach((_, idx) => {
+    const b = document.getElementById(`rpg-opt-${idx}`);
+    if (b) b.disabled = true;
+  });
+
+  if (chosen.correct) {
+    currentRpgScore += chosen.score || 10;
+    userState.correctAnswers++;
+  }
+  playFeedbackTone(chosen.correct);
+  speakKorean(chosen.text.split("(")[0].trim(), 0.88);
+
+  const fbBox = document.getElementById("rpg-step-feedback");
+  if (fbBox) {
+    fbBox.className = `rpg-feedback-box show`;
+    fbBox.style.border = chosen.correct
+      ? "1px solid var(--accent-emerald)"
+      : "1px solid var(--accent-rose)";
+    fbBox.innerHTML = `
+      <div style="font-weight:800; font-size:1rem; margin-bottom:4px; color:${chosen.correct ? "#34d399" : "#fb7185"};">
+        ${chosen.correct ? "✅ Excellente réponse !" : "⚠️ Attention aux nuances :"}
+      </div>
+      <div style="font-size:0.92rem; color:var(--text-primary); margin-bottom:12px; line-height:1.45;">
+        ${chosen.feedback}
+      </div>
+      <button class="btn btn-primary" onclick="nextRpgStep()">
+        ${currentRpgStepIndex + 1 < quest.steps.length ? "Étape suivante →" : "Voir le bilan de la quête 🏆"}
+      </button>
+    `;
+  }
+
+  const liveScore = document.getElementById("rpg-live-score");
+  if (liveScore) liveScore.textContent = `Score : ${currentRpgScore} pts`;
+  saveState();
+}
+
+function nextRpgStep() {
+  currentRpgStepIndex++;
+  renderRpgStep();
+}
+
+// ------------------------------------------
+// MODULE A2-5 : LECTEUR D'HISTOIRES AVEC SURVOL MAGIQUE
+// ------------------------------------------
+let currentStoryIndex = 0;
+let showStoryFrench = true;
+
+function renderHoverStoriesModule() {
+  if (!HOVER_STORIES || HOVER_STORIES.length === 0) return;
+
+  const selector = document.getElementById("story-selector-row");
+  if (selector) {
+    selector.innerHTML = HOVER_STORIES.map((st, idx) => {
+      const activeClass = idx === currentStoryIndex ? "active" : "";
+      return `
+        <button class="story-card-btn ${activeClass}" onclick="selectStory(${idx})">
+          <div style="font-size:0.75rem; text-transform:uppercase; color:var(--accent-primary); font-weight:800;">Histoire ${idx + 1}</div>
+          <div style="font-family:var(--font-kr); font-size:1.1rem; font-weight:700; margin:3px 0;">${st.title}</div>
+          <div style="font-size:0.78rem; color:var(--text-secondary);">${st.subtitle}</div>
+        </button>
+      `;
+    }).join("");
+  }
+
+  renderActiveStory();
+}
+
+function selectStory(idx) {
+  currentStoryIndex = idx;
+  renderHoverStoriesModule();
+}
+
+function toggleStoryTranslation() {
+  showStoryFrench = !showStoryFrench;
+  document.querySelectorAll(".story-sentence-fr").forEach((el) => {
+    el.style.display = showStoryFrench ? "block" : "none";
+  });
+  const btn = document.getElementById("btn-toggle-story-fr");
+  if (btn) btn.textContent = showStoryFrench ? "🙈 Masquer la traduction" : "👁️ Afficher la traduction";
+}
+
+function renderActiveStory() {
+  const container = document.getElementById("story-active-reader");
+  const story = HOVER_STORIES[currentStoryIndex];
+  if (!container || !story) return;
+
+  const sentencesHtml = story.sentences
+    .map((s, sIdx) => {
+      const tokensHtml = s.tokens
+        .map((tok, tIdx) => {
+          return `
+          <span class="story-token" 
+                data-sentence="${sIdx}" 
+                data-token="${tIdx}" 
+                onmouseenter="inspectStoryToken(${sIdx}, ${tIdx})"
+                onclick="inspectStoryToken(${sIdx}, ${tIdx}, true)">
+            <span>${tok.kr}</span>
+            <span class="story-token-roman roman-text">${tok.rom}</span>
+          </span>
+        `;
+        })
+        .join("");
+
+      return `
+        <div class="story-sentence-block">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+            <div class="story-tokens-row">${tokensHtml}</div>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+              <button class="audio-btn-circle" title="Vitesse normale" onclick="speakKorean('${escapeJsString(s.tokens.map((t) => t.kr).join(' '))}', 0.88)">🔊</button>
+              <button class="audio-btn-circle audio-slow-btn" title="Vitesse lente" onclick="speakKorean('${escapeJsString(s.tokens.map((t) => t.kr).join(' '))}', 0.6)">🐢</button>
+            </div>
+          </div>
+          <div class="story-sentence-fr">${s.fullFr}</div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const quizHtml = (story.quiz || [])
+    .map((q, qIdx) => {
+      const opts = q.options
+        .map(
+          (o, oIdx) => `
+        <button class="choice-btn" id="squiz-${qIdx}-${oIdx}" onclick="answerStoryQuiz(${qIdx}, ${oIdx})">
+          ${o}
+        </button>
+      `
+        )
+        .join("");
+
+      return `
+        <div class="rule-card" style="margin-top:16px;">
+          <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:10px;">❓ ${q.question}</h4>
+          <div style="display:flex; flex-direction:column; gap:8px;">${opts}</div>
+          <div class="feedback-banner" id="squiz-fb-${qIdx}" style="margin-top:8px;"></div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const firstToken = story.sentences[0]?.tokens[0] || { kr: "한국어", rom: "han-guk-eo", role: "Sujet", fr: "La langue coréenne" };
+
+  container.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+      <div>
+        <h2 style="font-family:var(--font-kr); font-size:1.6rem; font-weight:900; margin-bottom:4px;">${story.title}</h2>
+        <p style="color:var(--text-secondary); font-size:0.92rem;">${story.subtitle}</p>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="speakKorean('${escapeJsString(story.audioFull)}', 0.85)">
+          🔊 Écouter l'histoire complète
+        </button>
+        <button class="btn btn-secondary" id="btn-toggle-story-fr" onclick="toggleStoryTranslation()">
+          ${showStoryFrench ? "🙈 Masquer la traduction" : "👁️ Afficher la traduction"}
+        </button>
+      </div>
+    </div>
+
+    <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+      💡 <strong>Astuce survol magique :</strong> Passez la souris ou cliquez sur n'importe quel mot coréen pour voir son analyse grammaticale détaillée ci-dessous.
+    </div>
+
+    <div>${sentencesHtml}</div>
+
+    <!-- CARTE INSPECTEUR DE JETON -->
+    <div class="story-inspector-card" id="story-inspector">
+      <div>
+        <div style="font-size:0.75rem; text-transform:uppercase; color:var(--accent-primary); font-weight:800; margin-bottom:4px;">
+          🔍 Inspecteur Grammatical
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-family:var(--font-kr); font-size:1.4rem; font-weight:800;" id="insp-kr">
+            ${firstToken.kr}
+          </span>
+          <span class="roman-text" style="color:var(--text-secondary);" id="insp-rom">
+            [${firstToken.rom}]
+          </span>
+          <span class="level-badge" style="background:var(--accent-purple-soft); color:#c084fc;" id="insp-role">
+            ${firstToken.role}
+          </span>
+        </div>
+        <div style="font-size:0.92rem; color:var(--text-primary); margin-top:4px;" id="insp-fr">
+          ${firstToken.fr}
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="insp-audio-btn" onclick="speakKorean('${escapeJsString(firstToken.kr)}', 0.88)">
+        🔊 Prononcer ce mot
+      </button>
+    </div>
+
+    <div style="margin-top:26px;">
+      <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:8px;">Quiz de Compréhension :</h3>
+      ${quizHtml}
+    </div>
+  `;
+}
+
+function inspectStoryToken(sentenceIdx, tokenIdx, playAudio = false) {
+  const story = HOVER_STORIES[currentStoryIndex];
+  if (!story) return;
+  const token = story.sentences[sentenceIdx]?.tokens[tokenIdx];
+  if (!token) return;
+
+  const elKr = document.getElementById("insp-kr");
+  const elRom = document.getElementById("insp-rom");
+  const elRole = document.getElementById("insp-role");
+  const elFr = document.getElementById("insp-fr");
+  const btnAudio = document.getElementById("insp-audio-btn");
+
+  if (elKr) elKr.textContent = token.kr;
+  if (elRom) elRom.textContent = `[${token.rom}]`;
+  if (elRole) elRole.textContent = token.role;
+  if (elFr) elFr.textContent = token.fr;
+  if (btnAudio) btnAudio.onclick = () => speakKorean(token.kr, 0.88);
+
+  if (playAudio) {
+    speakKorean(token.kr, 0.88);
+  }
+}
+
+function answerStoryQuiz(qIdx, oIdx) {
+  const story = HOVER_STORIES[currentStoryIndex];
+  if (!story || !story.quiz || !story.quiz[qIdx]) return;
+  const q = story.quiz[qIdx];
+  const isCorrect = oIdx === q.correct;
+
+  q.options.forEach((_, idx) => {
+    const btn = document.getElementById(`squiz-${qIdx}-${idx}`);
+    if (btn) {
+      if (idx === q.correct) btn.classList.add("correct");
+      if (idx === oIdx && !isCorrect) btn.classList.add("wrong");
+    }
+  });
+
+  const fb = document.getElementById(`squiz-fb-${qIdx}`);
+  if (fb) {
+    fb.className = `feedback-banner show ${isCorrect ? "ok" : "err"}`;
+    fb.innerHTML = `
+      <div style="font-weight:700; color:${isCorrect ? "#34d399" : "#fb7185"};">
+        ${isCorrect ? "✅ Bravo, excellente compréhension !" : "❌ Mauvaise réponse, relisez bien la phrase."}
+      </div>
+      <div style="font-size:0.86rem; color:var(--text-secondary); margin-top:2px;">${q.explanation}</div>
+    `;
+  }
+  playFeedbackTone(isCorrect);
+  if (isCorrect) {
+    userState.correctAnswers++;
+    saveState();
+  }
+}
+
+// ------------------------------------------
+// MODULE A2-6 : QUÊTES DU JOUR & EXPORT ANKI
+// ------------------------------------------
+function getTodayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function initDailyQuestsState() {
+  const today = getTodayString();
+  if (!userState.dailyQuests || userState.dailyQuests.date !== today) {
+    userState.dailyQuests = {
+      date: today,
+      completedIds: [],
+      xp: 0
+    };
+    saveState();
+  }
+}
+
+function renderDailyQuestsModule() {
+  initDailyQuestsState();
+
+  const container = document.getElementById("daily-quests-container");
+  const dateLabel = document.getElementById("daily-quest-date-label");
+  const xpTotal = document.getElementById("daily-xp-total");
+
+  if (dateLabel) {
+    const opts = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+    dateLabel.textContent = new Date().toLocaleDateString("fr-FR", opts);
+  }
+
+  if (xpTotal) {
+    xpTotal.textContent = `${userState.dailyQuests.xp || 0} XP`;
+  }
+
+  if (container && DAILY_QUESTS_DEF) {
+    container.innerHTML = DAILY_QUESTS_DEF.map((q) => {
+      const isDone = userState.dailyQuests.completedIds.includes(q.id);
+      return `
+        <div class="daily-quest-item ${isDone ? "completed" : ""}" onclick="toggleDailyQuest('${q.id}', event)">
+          <div class="daily-quest-left">
+            <input type="checkbox" ${isDone ? "checked" : ""} style="width:18px; height:18px; accent-color:var(--accent-emerald); cursor:pointer;">
+            <span class="daily-quest-icon">${q.icon}</span>
+            <div>
+              <div class="daily-quest-title">${q.title}</div>
+              <div style="font-size:0.75rem; color:var(--text-secondary); cursor:pointer;" onclick="event.stopPropagation(); switchTab('${q.tab}')">
+                Aller au module →
+              </div>
+            </div>
+          </div>
+          <div class="daily-quest-xp">+${q.xp} XP</div>
+        </div>
+      `;
+    }).join("");
+  }
+}
+
+function toggleDailyQuest(questId, event) {
+  if (event) event.stopPropagation();
+  initDailyQuestsState();
+
+  const q = DAILY_QUESTS_DEF.find((it) => it.id === questId);
+  if (!q) return;
+
+  const idx = userState.dailyQuests.completedIds.indexOf(questId);
+  if (idx === -1) {
+    userState.dailyQuests.completedIds.push(questId);
+    userState.dailyQuests.xp = (userState.dailyQuests.xp || 0) + q.xp;
+    playFeedbackTone(true);
+  } else {
+    userState.dailyQuests.completedIds.splice(idx, 1);
+    userState.dailyQuests.xp = Math.max(0, (userState.dailyQuests.xp || 0) - q.xp);
+  }
+  saveState();
+  renderDailyQuestsModule();
+}
+
+function exportAnkiCsv(type) {
+  let cards = [];
+  let filename = "coreen_anki_deck.csv";
+
+  if (type === "weak_and_favs") {
+    const ids = getReviewPoolIds();
+    ids.forEach((id) => {
+      if (ALL_VOCAB_MAP[id]) {
+        const it = ALL_VOCAB_MAP[id];
+        cards.push({
+          front: it.kr,
+          back: `${it.fr} [${it.roman}]`,
+          tag: `Coreen::Favoris::${it.categoryTitle || "Vocabulaire"}`
+        });
+      } else if (ALL_HANGUL_MAP[id]) {
+        const it = ALL_HANGUL_MAP[id];
+        cards.push({
+          front: it.char,
+          back: `Son : [${it.sound}] | Français : « ${it.frLike} » | Nom : ${it.name}`,
+          tag: "Coreen::Hangeul"
+        });
+      }
+    });
+
+    if (cards.length === 0) {
+      alert("Vous n'avez pas encore marqué de cartes en favoris (☆) ou fait d'erreurs ! Exportation de l'ensemble du vocabulaire débutant en cours...");
+      type = "all_vocab";
+    } else {
+      filename = "coreen_mes_favoris_anki.csv";
+    }
+  }
+
+  if (type === "all_vocab") {
+    ALL_VOCAB_LIST.forEach((it) => {
+      cards.push({
+        front: it.kr,
+        back: `${it.fr} [${it.roman}]${it.note ? ` (${it.note})` : ""}`,
+        tag: `Coreen::Vocabulaire::${it.categoryTitle || "General"}`
+      });
+    });
+    filename = "coreen_vocabulaire_complet_anki.csv";
+  } else if (type === "hanja") {
+    if (HANJA_ROOTS) {
+      HANJA_ROOTS.forEach((root) => {
+        cards.push({
+          front: `${root.hanja} (${root.hangul})`,
+          back: `Sens : ${root.meaning} [${root.roman}] | Mnémotechnique : ${root.mnemonic}`,
+          tag: "Coreen::Hanja::Racines"
+        });
+        root.words.forEach((w) => {
+          cards.push({
+            front: w.kr,
+            back: `${w.fr} [${w.roman}] | Racine : ${root.hanja} | Décomposition : ${w.breakdown}`,
+            tag: `Coreen::Hanja::${root.hangul}`
+          });
+        });
+      });
+    }
+    filename = "coreen_racines_hanja_anki.csv";
+  }
+
+  if (cards.length === 0) {
+    alert("Aucune carte à exporter.");
+    return;
+  }
+
+  // Format CSV standard Anki avec délimiteur point-virgule et entête
+  const header = "Recto;Verso;Tags\n";
+  const rows = cards
+    .map((c) => {
+      const cleanFront = `"${c.front.replace(/"/g, '""')}"`;
+      const cleanBack = `"${c.back.replace(/"/g, '""')}"`;
+      const cleanTag = `"${c.tag.replace(/"/g, '""')}"`;
+      return `${cleanFront};${cleanBack};${cleanTag}`;
+    })
+    .join("\n");
+
+  const csvContent = "\uFEFF" + header + rows; // UTF-8 BOM
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 // Initialisation globale
 window.addEventListener("DOMContentLoaded", () => {
   initDataIndices();
@@ -2192,4 +3064,12 @@ window.addEventListener("DOMContentLoaded", () => {
   updateTimeConverter(false);
   updateWonConverter(false);
   renderChecklistModule();
+
+  // Initialisation des modules Niveau 2
+  renderLevel2Grammar();
+  renderIrregularsModule();
+  renderHanjaModule();
+  renderRpgModule();
+  renderHoverStoriesModule();
+  renderDailyQuestsModule();
 });

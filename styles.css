@@ -1420,3 +1420,776 @@ body[data-roman="hidden"] .ex-roman {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ========================================================
+   LEVEL SWITCHER (A1 Fondations vs A2 Intermédiaire)
+   ======================================================== */
+.level-switcher-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+.level-switcher-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.level-switcher-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.level-active-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-primary-soft);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.level-toggle-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.level-switch-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.level-switch-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.level-switch-btn.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(168, 85, 247, 0.18));
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.level-switch-btn.active[data-target-level="a2"] {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(244, 63, 94, 0.2));
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+}
+
+.lvl-icon {
+  font-size: 1.15rem;
+}
+
+.lvl-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.lvl-info strong {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.lvl-info small {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* Topbar Level Indicator */
+.level-indicator-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.level-switch-quick {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--accent-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.level-switch-quick:hover {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+/* ========================================================
+   MODULES NIVEAU 2 : STYLES DÉDIÉS
+   ======================================================== */
+
+/* 1. Grammaire A2 */
+.grammar-a2-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.grammar-card-a2 {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.grammar-card-a2:hover {
+  border-color: var(--accent-purple);
+}
+
+.formula-banner {
+  background: var(--bg-elevated);
+  border-left: 4px solid var(--accent-purple);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin: 14px 0;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+}
+
+.formula-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--accent-purple);
+  margin-bottom: 4px;
+}
+
+.formula-body {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+
+.keypoints-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keypoints-list li {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.45;
+}
+
+.keypoints-list li::before {
+  content: "✦";
+  color: var(--accent-purple);
+  font-weight: 800;
+}
+
+/* Politesse Comparison Table */
+.politeness-table-wrapper {
+  overflow-x: auto;
+  margin-top: 14px;
+}
+
+.politeness-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.politeness-table th,
+.politeness-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.politeness-table th {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.politeness-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* 2. Verbes Irréguliers */
+.irregulars-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.irregular-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+}
+
+.irregular-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.irregular-char-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--accent-rose-soft);
+  color: var(--accent-rose);
+  font-size: 1.6rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-kr);
+}
+
+.irregular-rule-box {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.verbs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.verbs-table th,
+.verbs-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.verbs-table th {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.verbs-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.verb-kr {
+  font-family: var(--font-kr);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.verb-hl {
+  color: var(--accent-rose);
+  font-weight: 800;
+}
+
+/* 3. Hanja Explorer */
+.hanja-roots-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.hanja-root-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.hanja-root-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-amber);
+}
+
+.hanja-root-btn.active {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.2);
+}
+
+.hanja-char-big {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--accent-amber);
+  line-height: 1;
+}
+
+.hanja-hero-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(168, 85, 247, 0.08));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.hanja-hero-char {
+  font-size: 4rem;
+  font-weight: 900;
+  color: #fbbf24;
+  line-height: 1;
+  background: var(--bg-surface);
+  border: 2px solid var(--accent-amber);
+  width: 90px;
+  height: 90px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hanja-hero-info h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.hanja-hero-mnemonic {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-top: 6px;
+}
+
+.hanja-words-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.hanja-word-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.hanja-word-card:hover {
+  border-color: var(--accent-amber);
+  transform: translateY(-2px);
+}
+
+.hanja-word-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.hanja-word-kr {
+  font-family: var(--font-kr);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.hanja-word-breakdown {
+  background: var(--bg-elevated);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.hanja-word-meaning {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+}
+
+/* 4. RPG & Aventures à Séoul */
+.rpg-selector-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.rpg-tab-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 220px;
+}
+
+.rpg-tab-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-emerald);
+}
+
+.rpg-tab-btn.active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--accent-emerald);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.2);
+}
+
+.rpg-arena {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.rpg-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.rpg-npc-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.rpg-npc-avatar {
+  font-size: 2.8rem;
+  background: var(--bg-elevated);
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--accent-emerald);
+  flex-shrink: 0;
+}
+
+.rpg-npc-bubble {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  border-top-left-radius: 4px;
+  padding: 16px 20px;
+  position: relative;
+  flex: 1;
+}
+
+.rpg-npc-name {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--accent-emerald);
+  margin-bottom: 4px;
+}
+
+.rpg-npc-line {
+  font-family: var(--font-kr);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.rpg-choices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.rpg-choice-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rpg-choice-card:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  background: var(--bg-hover);
+  transform: translateX(4px);
+}
+
+.rpg-choice-card.selected-correct {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: var(--accent-emerald);
+}
+
+.rpg-choice-card.selected-wrong {
+  background: rgba(244, 63, 94, 0.18);
+  border-color: var(--accent-rose);
+}
+
+.rpg-feedback-box {
+  background: var(--bg-elevated);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+  display: none;
+}
+
+.rpg-feedback-box.show {
+  display: block;
+}
+
+/* 5. Lecteur d'Histoires avec Survol Magique */
+.story-selector-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.story-card-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  text-align: left;
+  flex: 1;
+  min-width: 240px;
+}
+
+.story-card-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
+}
+
+.story-card-btn.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.2);
+}
+
+.story-reader-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 26px;
+  margin-bottom: 24px;
+}
+
+.story-sentence-block {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  transition: all 0.18s ease;
+}
+
+.story-sentence-block:hover {
+  border-color: var(--border-light);
+}
+
+.story-tokens-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.story-token {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: var(--font-kr);
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.story-token:hover, .story-token.active {
+  background: var(--accent-primary-soft);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  color: #60a5fa;
+}
+
+.story-token-roman {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.story-sentence-fr {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding-left: 4px;
+}
+
+.story-inspector-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(168, 85, 247, 0.1));
+  border: 1px solid var(--accent-primary);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* 6. Quêtes du Jour & Export Anki */
+.quests-and-anki-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .quests-and-anki-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.daily-quests-box,
+.anki-export-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.daily-quest-item {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.daily-quest-item.completed {
+  opacity: 0.7;
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.daily-quest-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.daily-quest-icon {
+  font-size: 1.5rem;
+}
+
+.daily-quest-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.daily-quest-xp {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--accent-amber);
+}
+
+.anki-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 14px 0;
+}
+
+.anki-preview-table th,
+.anki-preview-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.anki-preview-table th {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}

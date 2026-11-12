@@ -1,6 +1,7 @@
 // Base de données pédagogique complète :
-// Hangeul, Ordre des traits, Règles de lecture, Grammaire, Connecteurs, Niveaux de politesse,
-// Conjugaison, Vocabulaire, Dialogues, Nombres/Heures/Prix, Prononciation Micro & Checklist A1
+// NIVEAU 1 (A1 - FONDATIONS) & NIVEAU 2 (A2 - INTERMÉDIAIRE)
+// Hangeul, Tracé, Grammaire A1 & A2, Connecteurs, Politesse, Verbes Irréguliers,
+// Racines Hanja, RPG Séoul, Histoires Survol Magique, Nombres, Vocabulaire, Quêtes & Anki
 
 const HANGUL_DATA = {
   vowelsBasic: [
@@ -261,7 +262,7 @@ const HANGUL_DATA = {
   ]
 };
 
-// DONNÉES POUR L'ARDOISE D'ÉCRITURE & ORDRE DES TRAITS (STROKE ORDER)
+// TRACÉ ET ORDRE DES TRAITS
 const STROKE_ORDER_DATA = [
   {
     char: "ㄱ", syllable: "가", strokes: 1,
@@ -335,7 +336,7 @@ const STROKE_ORDER_DATA = [
   }
 ];
 
-// RÈGLES DE PRONONCIATION INDISPENSABLES
+// RÈGLES DE PRONONCIATION
 const READING_RULES = [
   {
     id: "rule_blocks",
@@ -387,7 +388,7 @@ const READING_RULES = [
 ];
 
 // ==========================================
-// COURS DE GRAMMAIRE FONDAMENTALE STRUCTURÉS (9 LEÇONS DONT CONNECTEURS & POLITESSE)
+// GRAMMAIRE NIVEAU 1 (A1 - FONDATIONS)
 // ==========================================
 const GRAMMAR_LESSONS = [
   {
@@ -398,11 +399,11 @@ const GRAMMAR_LESSONS = [
     formula: "Sujet + [Particule]  +  Objet + [Particule]  +  Verbe (TOUJOURS à la fin)",
     explanation: `En français, on dit : <strong>Je (Sujet) mange (Verbe) une pomme (Objet)</strong>.<br>
 En coréen, <strong>le verbe se place toujours tout à la fin de la phrase</strong> : on dit <em>« Je + pomme + mange »</em>.<br><br>
-De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</strong> juste après chaque nom pour indiquer son rôle (qui fait l'action, sur quoi porte l'action, où ça se passe).`,
+De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</strong> juste après chaque nom pour indiquer son rôle.`,
     keyPoints: [
       "Le verbe (ou l'adjectif) est le roi de la phrase : il est TOUJOURS le dernier mot.",
-      "Il n'y a ni genre (masculin/féminin), ni articles (le, la, un, une), ni conjugaison selon la personne (je, tu, il utilisent exactement la même forme du verbe !).",
-      "Dans la vie de tous les jours, si le sujet est évident (« je » ou « tu »), les Coréens l'omettent tout simplement."
+      "Il n'y a ni genre, ni articles, ni conjugaison selon la personne (je, tu, il utilisent la même forme !).",
+      "Si le sujet est évident, les Coréens l'omettent tout simplement."
     ],
     examples: [
       {
@@ -425,33 +426,22 @@ De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</
     title: "Le verbe « Être » : 이에요 (i-e-yo) / 예요 (ye-yo)",
     subtitle: "Se présenter et dire « C'est un... / Je suis... »",
     formula: "Nom (avec Batchim) + 이에요   |   Nom (sans Batchim) + 예요",
-    explanation: `En coréen, le verbe « être » (<strong>이다</strong>) ne s'écrit pas séparément : <strong>il se colle directement à la fin du nom</strong> !<br>
-• Si le nom se termine par une <strong>consonne (Batchim)</strong> → on ajoute <strong>이에요</strong> (<em>i-e-yo</em>).<br>
-• Si le nom se termine par une <strong>voyelle (sans Batchim)</strong> → on ajoute <strong>예요</strong> (<em>ye-yo</em>).`,
+    explanation: `En coréen, le verbe « être » (<strong>이다</strong>) se colle directement à la fin du nom :<br>
+• Si le nom se termine par une <strong>consonne (Batchim)</strong> → on ajoute <strong>이에요</strong>.<br>
+• Si le nom se termine par une <strong>voyelle (sans Batchim)</strong> → on ajoute <strong>예요</strong>.`,
     keyPoints: [
-      "Avec Batchim (consonne en bas) : 학생 (étudiant, finit par ㅇ) → 학생이에요.",
-      "Sans Batchim (finit par voyelle) : 의사 (médecin, finit par ㅏ) → 의사예요.",
-      "Pour dire « Ne pas être » : on utilise 아니에요 (ex: 학생이 아니에요 = Je ne suis pas étudiant)."
+      "Avec Batchim : 학생 (étudiant) → 학생이에요.",
+      "Sans Batchim : 의사 (médecin) → 의사예요.",
+      "Négation « Ne pas être » : 아니에요 (ex: 학생이 아니에요)."
     ],
     examples: [
       {
-        kr: "저는 학생이에요.",
-        roman: "Jeo-neun hak-saeng-i-e-yo.",
-        fr: "Je suis étudiant(e).",
+        kr: "저는 학생이에요. 저는 의사예요.",
+        roman: "Jeo-neun hak-saeng-i-e-yo. Jeo-neun ui-sa-ye-yo.",
+        fr: "Je suis étudiant(e). Je suis médecin.",
         breakdown: [
-          { part: "저는", role: "Thème", meaning: "Moi / Je" },
-          { part: "학생", role: "Nom (avec Batchim ㅇ)", meaning: "étudiant" },
-          { part: "이에요", role: "Verbe être", meaning: "suis / est" }
-        ]
-      },
-      {
-        kr: "저는 의사예요.",
-        roman: "Jeo-neun ui-sa-ye-yo.",
-        fr: "Je suis médecin.",
-        breakdown: [
-          { part: "저는", role: "Thème", meaning: "Moi / Je" },
-          { part: "의사", role: "Nom (finit par voyelle ㅏ)", meaning: "médecin" },
-          { part: "예요", role: "Verbe être", meaning: "suis / est" }
+          { part: "학생이에요", role: "Batchim ㅇ", meaning: "suis étudiant" },
+          { part: "의사예요", role: "Voyelle ㅏ", meaning: "suis médecin" }
         ]
       }
     ]
@@ -460,13 +450,13 @@ De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</
     id: "gram_3",
     level: "Base 3",
     title: "Les Particules de Thème (은/는) et de Sujet (이/가)",
-    subtitle: "Comprendre la différence entre 은/는 et 이/가 une bonne fois pour toutes",
+    subtitle: "Comprendre la différence entre 은/는 et 이/가",
     formula: "Thème : Consonne + 은 / Voyelle + 는   |   Sujet : Consonne + 이 / Voyelle + 가",
-    explanation: `<strong>1. 은 / 는 (Particule de Thème / Contraste)</strong> : signifie <em>« En ce qui concerne X... / Quant à X... »</em>. On l'utilise pour présenter un sujet général, parler de soi (<strong>저는</strong> = quant à moi) ou faire une comparaison.<br>
-<strong>2. 이 / 가 (Particule de Sujet grammatical)</strong> : met le projecteur sur le sujet précis d'une action ou d'un état (souvent avec des adjectifs ou « il y a / il n'y a pas »).`,
+    explanation: `<strong>1. 은 / 는 (Particule de Thème / Contraste)</strong> : <em>« En ce qui concerne X... / Quant à X... »</em>.<br>
+<strong>2. 이 / 가 (Particule de Sujet grammatical)</strong> : met le projecteur sur le sujet précis d'un état (adjectif) ou avec 있어요/없어요.`,
     keyPoints: [
-      "Astuce sonore : quand le mot finit par une consonne, on met une particule qui commence par une voyelle (은, 이) pour que la liaison soit fluide !",
-      "Avec les adjectifs descriptifs (c'est bon, c'est grand, c'est cher) et avec 있어요/없어요, on utilise presque toujours 이/가."
+      "Consonne + 은 / Voyelle + 는.",
+      "Avec les adjectifs descriptifs (c'est bon, c'est cher) → 이/가."
     ],
     examples: [
       {
@@ -474,9 +464,8 @@ De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</
         roman: "Keo-pi-ga ma-si-sseo-yo.",
         fr: "Le café est délicieux.",
         breakdown: [
-          { part: "커피", role: "Nom (voyelle)", meaning: "Café" },
-          { part: "가", role: "Particule Sujet", meaning: "(sujet)" },
-          { part: "맛있어요", role: "Adjectif conjugué", meaning: "est délicieux" }
+          { part: "커피가", role: "Sujet", meaning: "Le café" },
+          { part: "맛있어요", role: "Adjectif", meaning: "est délicieux" }
         ]
       }
     ]
@@ -484,13 +473,12 @@ De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</
   {
     id: "gram_4",
     level: "Base 4",
-    title: "La Particule d'Objet (을 / 를) : Faire une action sur quelque chose",
-    subtitle: "Manger quelque chose, boire quelque chose, regarder quelque chose",
+    title: "La Particule d'Objet (을 / 를) : Action sur quelque chose",
+    subtitle: "Manger, boire, regarder quelque chose",
     formula: "Nom (avec Batchim) + 을 (eul)   |   Nom (sans Batchim) + 를 (reul)",
-    explanation: `Dès qu'un verbe d'action porte sur un objet direct (manger <em>du riz</em>, boire <em>du café</em>, apprendre <em>le coréen</em>), on colle la particule d'objet <strong>을</strong> ou <strong>를</strong> juste après ce nom.`,
+    explanation: `Dès qu'un verbe d'action porte sur un objet direct, on colle la particule d'objet <strong>을</strong> ou <strong>를</strong>.`,
     keyPoints: [
-      "Consonne finale -> 을 (밥을, 물을) ; Voyelle finale -> 를 (커피를, 한국어를).",
-      "Ordre invariable : [Objet + 을/를] + [Verbe d'action conjugué]."
+      "Consonne finale -> 을 (밥을, 물을) ; Voyelle finale -> 를 (커피를, 한국어를)."
     ],
     examples: [
       {
@@ -498,9 +486,8 @@ De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</
         roman: "Han-gu-geo-reul gong-bu-hae-yo.",
         fr: "J'étudie le coréen.",
         breakdown: [
-          { part: "한국어", role: "Nom (voyelle)", meaning: "coréen" },
-          { part: "를", role: "Particule Objet", meaning: "(objet direct)" },
-          { part: "공부해요", role: "Verbe", meaning: "étudie" }
+          { part: "한국어를", role: "Objet direct", meaning: "le coréen" },
+          { part: "공부해요", role: "Verbe", meaning: "j'étudie" }
         ]
       }
     ]
@@ -509,24 +496,22 @@ De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</
     id: "gram_5",
     level: "Base 5",
     title: "Conjuguer au Présent Poli : -아요 / -어요 / -해요",
-    subtitle: "La règle unique qui permet de conjuguer 100 % des verbes et adjectifs coréens",
+    subtitle: "La règle universelle du style poli courant (해요체)",
     formula: "Voyelle ㅏ ou ㅗ → +아요   |   Autre voyelle → +어요   |   Verbe en 하다 → 해요",
-    explanation: `Enlevez <strong>-다</strong> de l'infinitif et regardez la dernière voyelle du radical :<br>
-1️⃣ Si c'est <strong>ㅏ</strong> ou <strong>ㅗ</strong> → ajoutez <strong>-아요</strong> (가다 → <strong>가요</strong> ; 오다 → <strong>와요</strong>).<br>
-2️⃣ Si c'est une <strong>autre voyelle</strong> → ajoutez <strong>-어요</strong> (먹다 → <strong>먹어요</strong> ; 마시다 → <strong>마셔요</strong>).<br>
-3️⃣ Si le verbe finit par <strong>하다</strong> → il devient <strong>해요</strong> (공부하다 → <strong>공부해요</strong>).`,
+    explanation: `1️⃣ Voyelle <strong>ㅏ</strong> ou <strong>ㅗ</strong> → <strong>-아요</strong> (가다 → <strong>가요</strong>).<br>
+2️⃣ Autre voyelle → <strong>-어요</strong> (먹다 → <strong>먹어요</strong>).<br>
+3️⃣ Verbe en <strong>하다</strong> → <strong>해요</strong> (공부하다 → <strong>공부해요</strong>).`,
     keyPoints: [
-      "La même forme sert pour Je, Tu, Il/Elle, Nous, Vous, Ils/Elles !",
-      "Rendez-vous dans l'onglet « 3. Atelier Conjugaison » pour pratiquer aussi le Passé, le Futur et l'Envie !"
+      "La même forme s'applique pour toutes les personnes."
     ],
     examples: [
       {
-        kr: "가다 → 가요 / 먹다 → 먹어요",
-        roman: "ga-da → ga-yo / meok-da → meo-geo-yo",
-        fr: "Aller → Je vais / Manger → Je mange",
+        kr: "가요, 먹어요, 공부해요.",
+        roman: "ga-yo, meo-geo-yo, gong-bu-hae-yo.",
+        fr: "Je vais, je mange, j'étudie.",
         breakdown: [
-          { part: "가요", role: "Voyelle ㅏ", meaning: "vais / va" },
-          { part: "먹어요", role: "Voyelle ㅓ", meaning: "mange" }
+          { part: "가요", role: "ㅏ + 아요", meaning: "vais" },
+          { part: "먹어요", role: "ㅓ + 어요", meaning: "mange" }
         ]
       }
     ]
@@ -534,23 +519,23 @@ De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</
   {
     id: "gram_6",
     level: "Base 6",
-    title: "Les Particules de Lieu : 에 (Destination/Présence) vs 에서 (Lieu d'action)",
-    subtitle: "Savoir dire « Je vais à Séoul » vs « J'étudie à Séoul »",
-    formula: "Lieu + 에 (Aller à / Être à)   |   Lieu + 에서 (Faire une action DANS un lieu)",
-    explanation: `<strong>1. Lieu + 에 (e)</strong> : indique une <strong>destination</strong> (avec 가요, 와요) ou une <strong>présence statique</strong> (avec 있어요, 없어요).<br>
-<strong>2. Lieu + 에서 (e-seo)</strong> : indique l'endroit où se déroule une <strong>action active</strong> (manger, travailler, étudier, acheter...).`,
+    title: "Lieu & Destination : 에 (Destination/Présence) vs 에서 (Action)",
+    subtitle: "Aller à un endroit vs Agir dans un endroit",
+    formula: "Lieu + 에 (Aller/Être)   |   Lieu + 에서 (Faire une action dans le lieu)",
+    explanation: `<strong>1. 에</strong> : destination avec 가요 (aller), 와요 (venir) ou présence avec 있어요 (être là).<br>
+<strong>2. 에서</strong> : lieu où l'on effectue une action (manger, étudier, acheter).`,
     keyPoints: [
-      "Si le verbe est 가요 (aller), 와요 (venir) ou 있어요 (être présent) → 에.",
-      "Si c'est une action dynamique (manger, étudier, travailler) → 에서 !"
+      "가요, 와요, 있어요 → 에.",
+      "Action active (manger, étudier) → 에서."
     ],
     examples: [
       {
-        kr: "학교에 가요. 학교에서 공부해요.",
-        roman: "Hak-gyo-e ga-yo. Hak-gyo-e-seo gong-bu-hae-yo.",
-        fr: "Je vais à l'école. J'étudie à l'école.",
+        kr: "학교에 가요. 식당에서 밥을 먹어요.",
+        roman: "Hak-gyo-e ga-yo. Sik-ttang-e-seo ba-beul meo-geo-yo.",
+        fr: "Je vais à l'école. Je mange au restaurant.",
         breakdown: [
-          { part: "학교에", role: "Destination", meaning: "à l'école (avec 가요)" },
-          { part: "학교에서", role: "Lieu d'action", meaning: "à l'école (avec 공부해요)" }
+          { part: "학교에", role: "Destination", meaning: "à l'école" },
+          { part: "식당에서", role: "Lieu d'action", meaning: "au restaurant" }
         ]
       }
     ]
@@ -559,13 +544,12 @@ De plus, en coréen, on colle des petits marqueurs appelés <strong>particules</
     id: "gram_7",
     level: "Base 7",
     title: "Avoir / Il y a (있어요 / 없어요) & La Négation (안)",
-    subtitle: "Exprimer la possession, la présence et dire « je ne fais pas »",
+    subtitle: "Possession, présence et dire « ne pas »",
     formula: "Nom + 이/가 있어요 (J'ai / Il y a)   |   안 + Verbe (Ne pas + verbe)",
-    explanation: `Le verbe « avoir » et l'expression « il y a » sont le même mot : <strong>있다 → 있어요</strong> (opposé : <strong>없어요</strong>).<br>
-Pour nier un verbe d'action, placez simplement <strong>안</strong> juste devant le verbe conjugué : <strong>안 먹어요</strong> (je ne mange pas).`,
+    explanation: `Le verbe « avoir » et « il y a » : <strong>있다 → 있어요</strong> (opposé : <strong>없어요</strong>).<br>
+Pour nier un verbe, placez <strong>안</strong> juste devant : <strong>안 가요</strong> (je ne vais pas).`,
     keyPoints: [
-      "Pour les verbes en Nom + 해요 (comme 공부해요), « 안 » se place juste devant 해요 : 공부 안 해요.",
-      "Avec 있어요 / 없어요, l'objet possédé prend la particule 이 / 가 : 시간이 있어요 (J'ai du temps)."
+      "Verbes en Nom + 해요 : 안 se place entre les deux (공부 안 해요)."
     ],
     examples: [
       {
@@ -582,37 +566,24 @@ Pour nier un verbe d'action, placez simplement <strong>안</strong> juste devant
   {
     id: "gram_8",
     level: "Base 8 • Connecteurs",
-    title: "Les « Mots-Ponts » : Relier des mots et des phrases (하고, -고, -지만, -아서/어서)",
-    subtitle: "Passer des phrases de 2 mots à de vraies phrases fluides (« avec », « et », « mais », « donc »)",
+    title: "Les « Mots-Ponts » : 하고, -고, -지만, -아서/어서",
+    subtitle: "Relier des phrases (« avec », « et », « mais », « donc »)",
     formula: "Nom + 하고 (et/avec)  |  Radical + 고 (et)  |  Radical + 지만 (mais)  |  -아서/어서 (donc/parce que)",
-    explanation: `Pour relier vos idées comme un vrai locuteur coréen, voici les 4 connecteurs indispensables :<br><br>
-1️⃣ <strong>Nom + 하고</strong> (ou <strong>-(이)랑</strong> à l'oral) = <em>« et » / « avec »</em> (entre deux noms).<br>
-2️⃣ <strong>Radical de verbe + -고</strong> = <em>« et / puis »</em> (pour relier deux phrases/actions sans conjuguer le 1er verbe !).<br>
-3️⃣ <strong>Radical de verbe + -지만</strong> = <em>« mais »</em> (ex: 비싸지만 = c'est cher, mais...).<br>
-4️⃣ <strong>Forme -아요/어요 (sans 요) + 서</strong> = <em>« parce que / donc »</em> (ex: 맛있어서 = parce que c'est bon).`,
+    explanation: `1️⃣ <strong>Nom + 하고 / -(이)랑</strong> = « et / avec » entre deux noms.<br>
+2️⃣ <strong>Radical + -고</strong> = « et / puis » entre deux verbes.<br>
+3️⃣ <strong>Radical + -지만</strong> = « mais » (비싸지만 = c'est cher, mais...).<br>
+4️⃣ <strong>-아서/어서</strong> = « parce que / donc » (맛있어서 = parce que c'est bon).`,
     keyPoints: [
-      "Avec -고 et -지만, on enlève simplement -다 du 1er verbe et on colle -고 ou -지만 (aucune fusion de voyelle !).",
-      "Seul le DERNIER verbe tout au bout de la phrase prend la marque du temps et le -요 final."
+      "Avec -고 et -지만 : enlevez simplement -다 et collez le connecteur."
     ],
     examples: [
-      {
-        kr: "친구랑 식당에 가고 밥을 먹어요.",
-        roman: "Chin-gu-rang sik-ttang-e ga-go ba-beul meo-geo-yo.",
-        fr: "Je vais au restaurant avec un ami et je mange un repas.",
-        breakdown: [
-          { part: "친구랑", role: "Nom + 랑", meaning: "avec un ami" },
-          { part: "식당에 가고", role: "Verbe 1 + -고", meaning: "vais au restaurant et" },
-          { part: "밥을 먹어요", role: "Verbe final", meaning: "mange un repas" }
-        ]
-      },
       {
         kr: "비싸지만 맛있어요!",
         roman: "Bi-ssa-ji-man ma-si-sseo-yo!",
         fr: "C'est cher, mais c'est délicieux !",
         breakdown: [
-          { part: "비싸", role: "Radical (비싸다)", meaning: "être cher" },
-          { part: "지만", role: "Connecteur", meaning: "mais" },
-          { part: "맛있어요", role: "Adjectif final", meaning: "c'est délicieux" }
+          { part: "비싸지만", role: "Connecteur mais", meaning: "c'est cher mais" },
+          { part: "맛있어요", role: "Verbe final", meaning: "c'est bon" }
         ]
       }
     ]
@@ -620,33 +591,621 @@ Pour nier un verbe d'action, placez simplement <strong>안</strong> juste devant
   {
     id: "gram_9",
     level: "Base 9 • Politesse",
-    title: "Les 3 Niveaux de Politesse : Formel (-습니다) vs Poli (-요) vs Banmal (반말)",
-    subtitle: "Comprendre pourquoi les K-Dramas disent « 고마워 » alors qu'au café on dit « 감사합니다 »",
-    formula: "Formel : Radical + -ㅂ니다/습니다  |  Poli courant : -아요/어요  |  Familier (Banmal) : sans -요",
-    explanation: `En coréen, la fin du verbe change selon votre relation avec votre interlocuteur :<br><br>
-🏛️ <strong>1. Formel très poli (하십시오체 : -ㅂ니다 / -습니다)</strong> : utilisé avec les clients, dans les annonces officielles, à l'armée, aux infos TV et dans des formules figées (<em>감사합니다</em>, <em>죄송합니다</em>).<br>
-🤝 <strong>2. Poli standard (해요체 : -아요 / -어요)</strong> : votre meilleur allié ! Utilisé 90 % du temps dans la vie quotidienne avec des adultes, des commerçants ou des collègues.<br>
-🏠 <strong>3. Familier / Banmal (반말 : on enlève simplement le -요 final !)</strong> : utilisé uniquement avec les amis très proches du même âge, les enfants, ou en couple (omniprésent dans les K-Dramas et la K-Pop).`,
+    title: "Les 3 Niveaux de Politesse : Formel (-습니다), Poli (-요), Banmal (반말)",
+    subtitle: "Comprendre la hiérarchie sociale coréenne",
+    formula: "Formel : -ㅂ니다/습니다  |  Poli : -아요/어요  |  Banmal : sans -요",
+    explanation: `🏛️ <strong>Formel (-습니다)</strong> : cadre officiel, armée, annonces.<br>
+🤝 <strong>Poli (-아요/어요)</strong> : vie quotidienne normale (recommandé !).<br>
+🏠 <strong>Banmal (반말)</strong> : amis intimes du même âge, enfants, couple.`,
     keyPoints: [
-      "Règle d'or en Corée : dans le doute, utilisez TOUJOURS le niveau Poli en -요 ! Passer en Banmal sans permission est perçu comme impoli.",
-      "Pour passer du Poli (-아요/어요) au Banmal, il suffit dans 95 % des cas de retirer la syllabe « 요 » à la fin : 먹어요 → 먹어, 가요 → 가, 고마워요 → 고마워."
+      "Dans le doute, utilisez TOUJOURS le niveau en -요 !",
+      "Pour passer en Banmal, on retire simplement « 요 » à la fin."
     ],
     examples: [
       {
-        kr: "감사합니다 (Formel) / 고마워요 (Poli) / 고마워 (Familier)",
+        kr: "감사합니다 (Formel) / 고마워요 (Poli) / 고마워 (Banmal)",
         roman: "Gam-sa-ham-ni-da / Go-ma-wo-yo / Go-ma-wo",
-        fr: "Merci (Très formel) / Merci (Poli) / Merci (Entre amis)",
+        fr: "Merci (Formel) / Merci (Poli) / Merci (Familier)",
         breakdown: [
-          { part: "감사합니다", role: "Formel (-ㅂ니다)", meaning: "Merci (respectueux)" },
-          { part: "고마워요", role: "Poli (-요)", meaning: "Merci (courant)" },
-          { part: "고마워", role: "Banmal (sans 요)", meaning: "Merci (ami proche)" }
+          { part: "감사합니다", role: "Formel", meaning: "Merci" },
+          { part: "고마워요", role: "Poli", meaning: "Merci" },
+          { part: "고마워", role: "Banmal", meaning: "Merci" }
         ]
       }
     ]
   }
 ];
 
-// TABLEAU COMPARATIF DES 3 NIVEAUX DE POLITESSE (DÉCODEUR K-DRAMA vs VIE RÉELLE)
+// ==========================================
+// GRAMMAIRE NIVEAU 2 (A2 - INTERMÉDIAIRE)
+// ==========================================
+const LEVEL2_GRAMMAR = [
+  {
+    id: "g2_1",
+    level: "A2 • Capacité",
+    title: "Pouvoir / Ne pas pouvoir : -(으)ㄹ 수 있어요 / 없어요",
+    subtitle: "Exprimer ses capacités physiques ou matérielles",
+    formula: "Sans Batchim + ㄹ 수 있어요   |   Avec Batchim + 을 수 있어요",
+    explanation: `Pour dire que vous <em>pouvez</em> faire quelque chose (j'ai la compétence ou la possibilité), collez <strong>-(으)ㄹ 수 있어요</strong> au radical.<br>
+Pour dire que vous <em>ne pouvez pas</em> (incapacité ou empêchement), utilisez <strong>-(으)ㄹ 수 없어요</strong> (ou le mot court <strong>못 + verbe</strong>).<br><br>
+• Sans Batchim : 가다 → <strong>갈 수 있어요</strong> (Je peux y aller) ; 하다 → <strong>할 수 있어요</strong> (Je peux le faire).<br>
+• Avec Batchim : 먹다 → <strong>먹을 수 있어요</strong> (Je peux manger) ; 읽다 → <strong>읽을 수 있어요</strong> (Je peux lire).`,
+    keyPoints: [
+      "Le verbe 'faire' devient 할 수 있어요 (I can do it / Yes we can !).",
+      "Pour dire 'Je ne peux pas manger de viande' : 고기를 먹을 수 없어요 (ou 못 먹어요)."
+    ],
+    examples: [
+      {
+        kr: "한국어를 할 수 있어요.",
+        roman: "Han-gu-geo-reul hal su i-sseo-yo.",
+        fr: "Je peux parler (faire) coréen.",
+        breakdown: [
+          { part: "한국어를", role: "Objet", meaning: "le coréen" },
+          { part: "할 수 있어요", role: "하다 + ㄹ 수 있어요", meaning: "peux faire" }
+        ]
+      },
+      {
+        kr: "매운 음식을 먹을 수 없어요.",
+        roman: "Mae-un eum-si-geul meo-geul su eop-seo-yo.",
+        fr: "Je ne peux pas manger de nourriture épicée.",
+        breakdown: [
+          { part: "매운 음식", role: "Nom", meaning: "nourriture épicée" },
+          { part: "먹을 수 없어요", role: "먹다 + 을 수 없어요", meaning: "ne peux pas manger" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "g2_2",
+    level: "A2 • Obligation",
+    title: "Devoir / Obligation : -아야/어야 돼요 (해요)",
+    subtitle: "Dire « Il faut que je... / Je dois absolument... »",
+    formula: "Forme -아요 (sans 요) + 돼요   |   Forme -어요 (sans 요) + 돼요   |   하다 → 해야 돼요",
+    explanation: `C'est l'une des structures les plus utilisées au quotidien. On prend la forme normale du présent en <strong>-아요/어요</strong>, on retire le <strong>요</strong> final, et on colle <strong>돼요</strong> (ou <strong>해요</strong>) !<br><br>
+• 가요 → <strong>가야 돼요</strong> (Je dois y aller / Il faut partir).<br>
+• 먹어요 → <strong>먹어야 돼요</strong> (Je dois manger).<br>
+• 공부해요 → <strong>공부해야 돼요</strong> (Je dois étudier).`,
+    keyPoints: [
+      "돼요 vient du verbe 되다 (marcher, fonctionner, convenir). Littéralement : 'Il faut faire X pour que ça convienne'.",
+      "Au passé : 가야 됐어요 (J'ai dû partir)."
+    ],
+    examples: [
+      {
+        kr: "지금 집에 가야 돼요.",
+        roman: "Ji-geum ji-be ga-ya dwae-yo.",
+        fr: "Maintenant, je dois rentrer à la maison.",
+        breakdown: [
+          { part: "지금", role: "Temps", meaning: "maintenant" },
+          { part: "집에", role: "Lieu", meaning: "à la maison" },
+          { part: "가야 돼요", role: "Obligation", meaning: "dois aller" }
+        ]
+      },
+      {
+        kr: "내일 시험이 있어서 공부해야 돼요.",
+        roman: "Nae-il si-heo-mi i-sseo-seo gong-bu-hae-ya dwae-yo.",
+        fr: "Comme j'ai un examen demain, je dois étudier.",
+        breakdown: [
+          { part: "시험이 있어서", role: "Cause", meaning: "parce qu'il y a un examen" },
+          { part: "공부해야 돼요", role: "Obligation", meaning: "dois étudier" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "g2_3",
+    level: "A2 • Présent Continu",
+    title: "Action en cours : Radical + -고 있어요",
+    subtitle: "L'équivalent de « être en train de faire » (anglais -ing)",
+    formula: "Radical de verbe + -고 있어요",
+    explanation: `Très facile ! Il n'y a AUCUNE fusion de voyelle : prenez l'infinitif, retirez <strong>-다</strong> et collez directement <strong>-고 있어요</strong>.<br><br>
+• 먹다 → <strong>먹고 있어요</strong> (Je suis en train de manger).<br>
+• 보다 → <strong>보고 있어요</strong> (Je suis en train de regarder).<br>
+• 자다 → <strong>자고 있어요</strong> (Je suis en train de dormir).<br>
+• 일하다 → <strong>일하고 있어요</strong> (Je suis en train de travailler).`,
+    keyPoints: [
+      "À la question '지금 뭐 해요?' (Que fais-tu maintenant ?), répondre avec -고 있어요 sonne immédiatement très naturel !",
+      "Au passé continu : 먹고 있었어요 (J'étais en train de manger)."
+    ],
+    examples: [
+      {
+        kr: "지금 넷플릭스를 보고 있어요.",
+        roman: "Ji-geum net-peul-lik-seu-reul bo-go i-sseo-yo.",
+        fr: "Je suis en train de regarder Netflix maintenant.",
+        breakdown: [
+          { part: "보고 있어요", role: "보다 + 고 있어요", meaning: "en train de regarder" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "g2_4",
+    level: "A2 • Requête & Politesse",
+    title: "Demande polie / Requête : -(으)세요",
+    subtitle: "Demander gentiment à quelqu'un de faire quelque chose (« Veuillez faire... »)",
+    formula: "Sans Batchim + -세요   |   Avec Batchim + -으세요",
+    explanation: `Quand vous vous adressez à quelqu'un et voulez lui dire poliment « faites ceci s'il vous plaît » ou « allez-y » :<br><br>
+• Sans Batchim : 가다 → <strong>가세요</strong> (Allez-y / Passez bonne route) ; 오다 → <strong>오세요</strong> (Venez / Entrez).<br>
+• Avec Batchim : 앉다 (s'asseoir) → <strong>앉으세요</strong> (Asseyez-vous SVP) ; 읽다 → <strong>읽으세요</strong> (Lisez SVP).<br><br>
+💡 C'est exactement cette formule qu'on retrouve dans <strong>안녕하세요</strong> (Soyez en paix) et <strong>어서 오세요</strong> (Soyez le bienvenu) !`,
+    keyPoints: [
+      "Attention aux verbes honorifiques spéciaux : 먹다 devient 드시다 → 드세요 (Mangez SVP / Bon appétit !)."
+    ],
+    examples: [
+      {
+        kr: "여기에 앉으세요.",
+        roman: "Yeo-gi-e an-jeu-se-yo.",
+        fr: "Asseyez-vous ici, s'il vous plaît.",
+        breakdown: [
+          { part: "여기에", role: "Lieu", meaning: "ici" },
+          { part: "앉으세요", role: "앉다 + 으세요", meaning: "asseyez-vous SVP" }
+        ]
+      },
+      {
+        kr: "맛있게 드세요!",
+        roman: "Ma-sit-ge deu-se-yo!",
+        fr: "Bon appétit ! (Mangez délicieusement)",
+        breakdown: [
+          { part: "드세요", role: "Honorifique de 먹다", meaning: "mangez SVP" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "g2_5",
+    level: "A2 • Interdiction",
+    title: "L'Interdiction : Radical + -지 마세요",
+    subtitle: "Dire poliment « Ne faites pas cela »",
+    formula: "Radical de verbe + -지 마세요",
+    explanation: `Pour formuler une interdiction polie (« Ne partez pas », « Ne touchez pas », « Ne vous inquiétez pas »), enlevez <strong>-다</strong> et collez <strong>-지 마세요</strong>.<br><br>
+• 가다 → <strong>가지 마세요</strong> (Ne partez pas).<br>
+• 먹다 → <strong>먹지 마세요</strong> (Ne mangez pas ça).<br>
+• 걱정하다 (s'inquiéter) → <strong>걱정하지 마세요</strong> (Ne vous inquiétez pas !).`,
+    keyPoints: [
+      "En Banmal (entre amis) : -지 마 ! (ex: 가지 마 = Ne t'en va pas ! - grand classique de K-Drama).",
+      "Aucune irrégularité de voyelle : se colle directement sur le radical."
+    ],
+    examples: [
+      {
+        kr: "걱정하지 마세요. 다 괜찮아요.",
+        roman: "Geok-jeong-ha-ji ma-se-yo. Da gwaen-cha-na-yo.",
+        fr: "Ne vous inquiétez pas. Tout va bien.",
+        breakdown: [
+          { part: "걱정하지 마세요", role: "Interdiction", meaning: "ne vous inquiétez pas" },
+          { part: "다 괜찮아요", role: "Phrase", meaning: "tout va bien" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "g2_6",
+    level: "A2 • Cause",
+    title: "Cause & Raison : -(으)니까 vs -아서/어서",
+    subtitle: "Exprimer la justification (« Puisque... / Vu que... »)",
+    formula: "Radical (sans Batchim) + 니까   |   Radical (avec Batchim) + 으니까",
+    explanation: `En coréen, il y a deux façons majeures d'exprimer la cause :<br><br>
+1️⃣ <strong>-아서/어서</strong> : cause factuelle et neutre (ex: 배고파서 밥을 먹어요 = J'ai faim donc je mange).<br>
+2️⃣ <strong>-(으)니까</strong> : cause subjective / invitation / ordre : <em>« Vu que X, faisons Y ! »</em>.<br>
+• 비가 오니까 우산을 쓰세요 = <em>Vu qu'il pleut, prenez un parapluie !</em><br>
+• 시간이 없으니까 빨리 가요 = <em>Puisqu'on n'a pas le temps, allons-y vite !</em>`,
+    keyPoints: [
+      "Règle d'or : Devant une suggestion (-(으)세요 ou -(으)ㅂ시다), on NE PEUT PAS utiliser -아서/어서 ! On doit TOUJOURS utiliser -(으)니까.",
+      "날씨가 좋으니까 밖에 나가요 (Comme il fait beau, sortons !)."
+    ],
+    examples: [
+      {
+        kr: "비가 오니까 택시를 타요.",
+        roman: "Bi-ga o-ni-kka taek-si-reul ta-yo.",
+        fr: "Puisqu'il pleut, prenons le taxi.",
+        breakdown: [
+          { part: "비가 오니까", role: "Cause avec 니까", meaning: "vu qu'il pleut" },
+          { part: "택시를 타요", role: "Action", meaning: "prenons le taxi" }
+        ]
+      }
+    ]
+  }
+];
+
+// ==========================================
+// SIMULATEUR DES VERBES IRRÉGULIERS (D, B, S, EU, REU)
+// ==========================================
+const IRREGULAR_VERBS = [
+  {
+    type: "Irrégulier en ㄷ (ㄷ → ㄹ)",
+    rule: "Quand le Batchim ㄷ rencontre une voyelle, il se transforme en ㄹ ! (Devant une consonne, il reste ㄷ).",
+    verbs: [
+      {
+        infinitive: "듣다", meaning: "Écouter / Entendre",
+        present: "들어요", past: "들었어요", future: "들을 거예요",
+        note: "듣 + 어요 → le ㄷ devient ㄹ → 들어요 (음악을 들어요 = J'écoute de la musique)."
+      },
+      {
+        infinitive: "걷다", meaning: "Marcher",
+        present: "걸어요", past: "걸었어요", future: "걸을 거예요",
+        note: "걷 + 어요 → 걸어요 (공원에서 걸어요 = Je marche dans le parc)."
+      },
+      {
+        infinitive: "받다 (Régulier !)", meaning: "Recevoir (Piège)",
+        present: "받아요", past: "받았어요", future: "받을 거예요",
+        note: "Attention : 받다 et 닫다 (fermer) sont RÉGULIERS ! Le ㄷ ne change pas."
+      }
+    ]
+  },
+  {
+    type: "Irrégulier en ㅂ (ㅂ → 우/워)",
+    rule: "Sur la plupart des adjectifs, le Batchim ㅂ disparaît et devient 우 + 어요 = 워요.",
+    verbs: [
+      {
+        infinitive: "춥다", meaning: "Faire froid",
+        present: "추워요", past: "추웠어요", future: "추울 거예요",
+        note: "춥 + 어요 → ㅂ devient 우 → 추워요."
+      },
+      {
+        infinitive: "덥다", meaning: "Faire chaud",
+        present: "더워요", past: "더웠어요", future: "더울 거예요",
+        note: "더워요 (Il fait chaud)."
+      },
+      {
+        infinitive: "어렵다", meaning: "Être difficile",
+        present: "어려워요", past: "어려웠어요", future: "어려울 거예요",
+        note: "한국어가 어려워요 (Le coréen est difficile)."
+      },
+      {
+        infinitive: "돕다", meaning: "Aider (Exception en 오)",
+        present: "도와요", past: "도왔어요", future: "도울 거예요",
+        note: "Exception : 돕다 et 곱다 deviennent 와요 au présent (도와주세요 = Aidez-moi SVP !)."
+      }
+    ]
+  },
+  {
+    type: "Irrégulier en ㅅ (ㅅ disparaît)",
+    rule: "Le Batchim ㅅ disparaît complètement devant une voyelle, mais sans fusionner les voyelles.",
+    verbs: [
+      {
+        infinitive: "낫다", meaning: "Guérir / Être meilleur",
+        present: "나아요", past: "나았어요", future: "나을 거예요",
+        note: "낫 + 아요 → le ㅅ saute → 나아요 (감기 다 나았어요 = Mon rhume a guéri)."
+      },
+      {
+        infinitive: "짓다", meaning: "Construire / Faire cuire (du riz)",
+        present: "지어요", past: "지었어요", future: "지을 거예요",
+        note: "짓 + 어요 → le ㅅ saute → 지어요 (밥을 지어요 = Je prépare le riz)."
+      },
+      {
+        infinitive: "웃다 (Régulier !)", meaning: "Rire / Sourire (Piège)",
+        present: "웃어요", past: "웃었어요", future: "웃을 거예요",
+        note: "웃다 et 씻다 (se laver) sont RÉGULIERS : 웃어요, 씻어요."
+      }
+    ]
+  },
+  {
+    type: "Irrégulier en ㅡ (ㅡ s'efface)",
+    rule: "Quand le radical se termine par ㅡ, la voyelle ㅡ s'efface et prend la couleur de la voyelle précédente.",
+    verbs: [
+      {
+        infinitive: "크다", meaning: "Être grand",
+        present: "커요", past: "컸어요", future: "클 거예요",
+        note: "크 + 어요 → le ㅡ saute → 커요."
+      },
+      {
+        infinitive: "쓰다", meaning: "Écrire / Utiliser / Être amer",
+        present: "써요", past: "썼어요", future: "쓸 거예요",
+        note: "쓰 + 어요 → 써요 (편지를 써요 = J'écris une lettre)."
+      },
+      {
+        infinitive: "바쁘다", meaning: "Être occupé",
+        present: "바빠요", past: "바빴어요", future: "바쁠 거예요",
+        note: "바쁘 + 아요 → la voyelle avant ㅡ est ㅏ → 바빠요 !"
+      },
+      {
+        infinitive: "예쁘다", meaning: "Être joli(e)",
+        present: "예뻐요", past: "예뻤어요", future: "예쁠 거예요",
+        note: "예쁘 + 어요 → la voyelle avant ㅡ est ㅔ → 예뻐요 !"
+      }
+    ]
+  },
+  {
+    type: "Irrégulier en 르 (ㄹㄹ)",
+    rule: "Le ㅡ s'efface et un double ㄹ apparaît : un en bas de la syllabe d'avant, et un au début de la suivante !",
+    verbs: [
+      {
+        infinitive: "빠르다", meaning: "Être rapide",
+        present: "빨라요", past: "빨랐어요", future: "빠를 거예요",
+        note: "빠르 + 아요 → 빠 + ㄹ + 라요 = 빨라요 !"
+      },
+      {
+        infinitive: "모르다", meaning: "Ne pas savoir / Ignorer",
+        present: "몰라요", past: "몰랐어요", future: "모를 거예요",
+        note: "모르 + 아요 → 몰라요 ! (잘 몰라요 = Je ne sais pas bien)."
+      },
+      {
+        infinitive: "부르다", meaning: "Appeler / Chanter / Être rassasié",
+        present: "불러요", past: "불렀어요", future: "부를 거예요",
+        note: "노래를 불러요 = Je chante une chanson ; 배불러요 = J'ai le ventre plein."
+      }
+    ]
+  }
+];
+
+// ==========================================
+// EXPLORATEUR DE RACINES HANJA (LE CHEAT CODE DU VOCABULAIRE)
+// ==========================================
+const HANJA_ROOTS = [
+  {
+    hanja: "學",
+    hangul: "학",
+    roman: "hak",
+    meaning: "Étudier, Apprendre, Science",
+    mnemonic: "Imaginez un enfant avec un cartable qui apprend.",
+    words: [
+      { kr: "학생", hanja: "學生", roman: "hak-saeng", fr: "Étudiant (학 étude + 생 personne)", audio: "학생" },
+      { kr: "학교", hanja: "學校", roman: "hak-gyo", fr: "École (학 étude + 교 bâtiment scolaire)", audio: "학교" },
+      { kr: "학원", hanja: "學院", roman: "hag-won", fr: "Institut privé / Cours du soir", audio: "학원" },
+      { kr: "방학", hanja: "放學", roman: "bang-hak", fr: "Vacances scolaires (방 libérer + 학 étude)", audio: "방학" },
+      { kr: "대학교", hanja: "大學校", roman: "dae-hak-gyo", fr: "Université (대 grand + 학교 école)", audio: "대학교" }
+    ]
+  },
+  {
+    hanja: "室",
+    hangul: "실",
+    roman: "sil",
+    meaning: "Pièce, Salle, Chambre",
+    mnemonic: "Un espace fermé sous un toit.",
+    words: [
+      { kr: "화장실", hanja: "化粧室", roman: "hwa-jang-sil", fr: "Toilettes (화장 se faire beau + 실 pièce)", audio: "화장실" },
+      { kr: "교실", hanja: "敎室", roman: "gyo-sil", fr: "Salle de classe (교 enseigner + 실 pièce)", audio: "교실" },
+      { kr: "사무실", hanja: "事務室", roman: "sa-mu-sil", fr: "Bureau (사무 travail de bureau + 실 pièce)", audio: "사무실" },
+      { kr: "지하실", hanja: "地下室", roman: "ji-ha-sil", fr: "Sous-sol / Cave (지하 sous-terre + 실)", audio: "지하실" },
+      { kr: "응급실", hanja: "應急室", roman: "eung-geup-sil", fr: "Urgences de l'hôpital (응급 secours urgent + 실)", audio: "응급실" }
+    ]
+  },
+  {
+    hanja: "人",
+    hangul: "인",
+    roman: "in",
+    meaning: "Personne, Humain, Être",
+    mnemonic: "Un bonhomme debout sur ses deux jambes.",
+    words: [
+      { kr: "한국인", hanja: "韓國人", roman: "han-gu-gin", fr: "Coréen (한국 Corée + 인 personne)", audio: "한국인" },
+      { kr: "프랑스인", hanja: "프랑스人", roman: "peu-rang-seu-in", fr: "Français (프랑스 + 인)", audio: "프랑스인" },
+      { kr: "외국인", hanja: "外國人", roman: "oe-gu-gin", fr: "Étranger (외 extérieur + 국 pays + 인 personne)", audio: "외국인" },
+      { kr: "인기", hanja: "人氣", roman: "in-gi", fr: "Popularité (인 gens + 기 énergie/souffle)", audio: "인기" },
+      { kr: "개인", hanja: "個人", roman: "gae-in", fr: "Individu / Personnel", audio: "개인" }
+    ]
+  },
+  {
+    hanja: "食",
+    hangul: "식",
+    roman: "sik",
+    meaning: "Manger, Nourriture, Repas",
+    mnemonic: "Un bol fumant prêt à être consommé.",
+    words: [
+      { kr: "음식", hanja: "飮食", roman: "eum-sik", fr: "Nourriture (음 boisson + 식 aliment)", audio: "음식" },
+      { kr: "식당", hanja: "食堂", roman: "sik-ttang", fr: "Restaurant (식 repas + 당 salle)", audio: "식당" },
+      { kr: "한식", hanja: "韓食", roman: "han-sik", fr: "Cuisine coréenne (한 Corée + 식 cuisine)", audio: "한식" },
+      { kr: "식사", hanja: "食事", roman: "sik-sa", fr: "Repas (faire un repas)", audio: "식사" },
+      { kr: "간식", hanja: "間食", roman: "gan-sik", fr: "En-cas / Goûter (간 entre-temps + 식 repas)", audio: "간식" }
+    ]
+  },
+  {
+    hanja: "話",
+    hangul: "화",
+    roman: "hwa",
+    meaning: "Parler, Parole, Discussion",
+    mnemonic: "Des paroles qui sortent de la bouche.",
+    words: [
+      { kr: "전화", hanja: "電話", roman: "jeon-hwa", fr: "Téléphone (전 électricité + 화 parole)", audio: "전화" },
+      { kr: "대화", hanja: "對話", roman: "dae-hwa", fr: "Conversation / Dialogue (대 face à face + 화)", audio: "대화" },
+      { kr: "화제", hanja: "話題", roman: "hwa-je", fr: "Sujet de conversation", audio: "화제" },
+      { kr: "통화", hanja: "通話", roman: "tong-hwa", fr: "Appel téléphonique (être au téléphone)", audio: "통화" }
+    ]
+  },
+  {
+    hanja: "動",
+    hangul: "동",
+    roman: "dong",
+    meaning: "Bouger, Mouvement, Action",
+    mnemonic: "Une force lourde mise en mouvement.",
+    words: [
+      { kr: "운동", hanja: "運動", roman: "un-dong", fr: "Sport / Exercice physique (운 transporter + 동 bouger)", audio: "운동" },
+      { kr: "동물", hanja: "動物", roman: "dong-mul", fr: "Animal (동 bouger + 물 chose/être)", audio: "동물" },
+      { kr: "자동차", hanja: "自動車", roman: "ja-dong-cha", fr: "Voiture (자 auto + 동 mobile + 차 véhicule)", audio: "자동차" },
+      { kr: "활동", hanja: "活動", roman: "hwal-dong", fr: "Activité (활 vivant + 동 mouvement)", audio: "활동" }
+    ]
+  }
+];
+
+// ==========================================
+// AVENTURES INTERACTIVES / JEU DE RÔLE À SÉOUL (RPG)
+// ==========================================
+const SEOUL_QUESTS = [
+  {
+    id: "rpg_cu",
+    title: "Mission 1 : À la supérette coréenne (편의점)",
+    place: "CU / GS25 à Hongdae, 23h45",
+    intro: "Vous avez une faim de loup après avoir visité Séoul. Vous entrez dans un CU pour acheter un ramyeon et une boisson.",
+    npc: "직원 (Employé de supérette)",
+    avatar: "🏪",
+    steps: [
+      {
+        npcSay: "어서 오세요! (Le caissier vous salue)",
+        prompt: "Que répondez-vous poliment en franchissant la porte ?",
+        options: [
+          { text: "안녕하세요! (Bonjour)", score: 10, correct: true, feedback: "Parfait ! Simple, poli et chaleureux." },
+          { text: "밥 주세요. (Donne-moi du riz)", score: 0, correct: false, feedback: "Un peu brusque et inadapté pour une salutation d'entrée !" },
+          { text: "얼마예요? (Combien ça coûte ?)", score: 0, correct: false, feedback: "Vous n'avez encore rien pris en main !" }
+        ]
+      },
+      {
+        npcSay: "봉투 필요하세요? (Avez-vous besoin d'un sac en plastique ?)",
+        prompt: "Le caissier vous demande si vous voulez un sac (봉투). Vous avez déjà votre sac à dos. Que dites-vous ?",
+        options: [
+          { text: "아니요, 괜찮아요! (Non, ça va merci !)", score: 10, correct: true, feedback: "Excellente réponse, très naturelle !" },
+          { text: "네, 주세요. (Oui, donnez-moi)", score: 5, correct: true, feedback: "Ça marche aussi si vous vouliez un sac payant (100 wons) !" },
+          { text: "한국 사람이에요. (Je suis Coréen)", score: 0, correct: false, feedback: "Hors sujet !" }
+        ]
+      },
+      {
+        npcSay: "삼천오백 원입니다. 카드로 하시겠어요? (3 500 wons. Vous réglez par carte ?)",
+        prompt: "Vous tendez votre carte bancaire. Que dites-vous au moment de payer ?",
+        options: [
+          { text: "네, 여기 있어요. (Oui, voici)", score: 10, correct: true, feedback: "Impeccable ! '여기 있어요' est la formule parfaite quand on tend sa carte." },
+          { text: "안 가요. (Je n'y vais pas)", score: 0, correct: false, feedback: "Le caissier ne comprend pas !" },
+          { text: "젓가락 없어요? (Pas de baguettes ?)", score: 2, correct: false, feedback: "Attendez d'avoir payé pour les baguettes !" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "rpg_subway",
+    title: "Mission 2 : Prendre le métro et recharger sa carte T-Money (지하철)",
+    place: "Station Gangnam (강남역), Ligne 2",
+    intro: "Votre carte de transport T-Money est vide et vous devez rejoindre Hongdae en métro.",
+    npc: "역무원 (Agent de gare)",
+    avatar: "🚇",
+    steps: [
+      {
+        npcSay: "무엇을 도와드릴까요? (Que puis-je faire pour vous aider ?)",
+        prompt: "Vous voulez savoir où recharger votre carte T-Money. Que demandez-vous ?",
+        options: [
+          { text: "티머니 카드 충전 어디서 해요? (Où recharge-t-on la carte T-Money ?)", score: 10, correct: true, feedback: "Superbe phrase de niveau A2 !" },
+          { text: "커피 주세요. (Un café SVP)", score: 0, correct: false, feedback: "Vous êtes au guichet du métro !" },
+          { text: "지금 몇 시예요? (Quelle heure est-il ?)", score: 0, correct: false, feedback: "Ça ne résout pas votre problème de carte !" }
+        ]
+      },
+      {
+        npcSay: "저기 기계에서 하시면 돼요. (Vous pouvez le faire à la machine là-bas.)",
+        prompt: "L'agent vous montre la machine. Comment le remerciez-vous poliment ?",
+        options: [
+          { text: "감사합니다! (Merci beaucoup !)", score: 10, correct: true, feedback: "Parfait !" },
+          { text: "고마워! (Merci - familier)", score: 0, correct: false, feedback: "Trop familier pour un agent inconnu !" },
+          { text: "죄송합니다. (Pardon)", score: 2, correct: false, feedback: "Pas besoin de vous excuser, il faut le remercier !" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "rpg_bbq",
+    title: "Mission 3 : Au restaurant de Barbecue Coréen (삼겹살 식당)",
+    place: "Restaurant traditionnel à Myeongdong",
+    intro: "Vous vous installez à une table avec votre ami pour griller de la viande.",
+    npc: "이모님 (La gérante du restaurant)",
+    avatar: "🥩",
+    steps: [
+      {
+        npcSay: "몇 분이세요? (Combien de personnes êtes-vous ?)",
+        prompt: "Vous êtes deux. Que répondez-vous avec le bon compteur de personnes ?",
+        options: [
+          { text: "두 명이에요. (Deux personnes.)", score: 10, correct: true, feedback: "Exact ! 두 + 명 (personnes)." },
+          { text: "이 개예요. (2 objets)", score: 0, correct: false, feedback: "On ne compte pas les humains avec 개 et le chiffre sino-coréen !" },
+          { text: "혼자예요. (Je suis seul)", score: 0, correct: false, feedback: "Votre ami vous regarde bizarrement !" }
+        ]
+      },
+      {
+        npcSay: "주문하시겠어요? (Voulez-vous commander ?)",
+        prompt: "Vous voulez 2 portions de poitrine de porc (삼겹살 2인분) et de l'eau. Que dites-vous ?",
+        options: [
+          { text: "삼겹살 이인분하고 물 주세요! (2 portions de samgyeopsal et de l'eau SVP)", score: 10, correct: true, feedback: "Le combo parfait :하고 + 주세요 !" },
+          { text: "비싸지만 안 먹어요. (C'est cher mais je ne mange pas)", score: 0, correct: false, feedback: "La serveuse est déconcertée !" },
+          { text: "소주 있어요? (Avez-vous du soju ?)", score: 5, correct: true, feedback: "Valable, mais vous n'avez pas encore commandé à manger !" }
+        ]
+      }
+    ]
+  }
+];
+
+// ==========================================
+// HISTOIRES COURTES BILINGUES AVEC « SURVOL MAGIQUE »
+// ==========================================
+const HOVER_STORIES = [
+  {
+    id: "story_1",
+    title: "1. 나의 서울 하루 (Ma journée à Séoul)",
+    subtitle: "Une journée typique d'un étudiant étranger à Séoul",
+    audioFull: "오늘 아침에 일찍 일어났어요. 날씨가 아주 좋아서 기분이 좋아요.",
+    sentences: [
+      {
+        tokens: [
+          { kr: "오늘", rom: "o-neul", role: "Temps", fr: "Aujourd'hui" },
+          { kr: "아침에", rom: "a-chi-me", role: "Temps + 에", fr: "le matin (à)" },
+          { kr: "일찍", rom: "il-jjik", role: "Adverbe", fr: "tôt" },
+          { kr: "일어났어요.", rom: "i-reo-na-sseo-yo", role: "Passé (일어나다)", fr: "je me suis réveillé(e)" }
+        ],
+        fullFr: "Aujourd'hui, je me suis réveillé(e) tôt le matin."
+      },
+      {
+        tokens: [
+          { kr: "날씨가", rom: "nal-ssi-ga", role: "Sujet", fr: "Le temps / la météo" },
+          { kr: "아주", rom: "a-ju", role: "Adverbe", fr: "très" },
+          { kr: "좋아서", rom: "jo-a-seo", role: "좋다 + 아서 (Cause)", fr: "parce qu'il est bon" },
+          { kr: "기분이", rom: "gi-bu-ni", role: "Sujet", fr: "mon humeur" },
+          { kr: "좋아요.", rom: "jo-a-yo", role: "Présent", fr: "est bonne" }
+        ],
+        fullFr: "Comme il fait très beau, je suis de bonne humeur."
+      },
+      {
+        tokens: [
+          { kr: "친구랑", rom: "chin-gu-rang", role: "Nom + 랑 (avec)", fr: "Avec mon ami" },
+          { kr: "카페에서", rom: "ka-pe-e-seo", role: "Lieu d'action (에서)", fr: "au café" },
+          { kr: "커피를", rom: "keo-pi-reul", role: "Objet direct (를)", fr: "du café" },
+          { kr: "마시고", rom: "ma-si-go", role: "마시다 + 고 (et)", fr: "nous buvons et" },
+          { kr: "이야기했어요.", rom: "i-ya-gi-hae-sseo-yo", role: "Passé (이야기하다)", fr: "nous avons discuté." }
+        ],
+        fullFr: "Avec mon ami, nous avons bu un café et discuté au café."
+      }
+    ],
+    quiz: {
+      q: "Pourquoi le narrateur est-il de bonne humeur ?",
+      opts: ["Parce qu'il fait très beau (날씨가 좋아서)", "Parce qu'il a gagné au loto", "Parce que le café était gratuit"],
+      correct: 0,
+      expl: "La phrase dit '날씨가 아주 좋아서' (parce que le temps est très bon)."
+    }
+  },
+  {
+    id: "story_2",
+    title: "2. 주말의 쇼핑 (Shopping du week-end à Hongdae)",
+    subtitle: "Acheter des vêtements et trouver que c'est un peu cher",
+    audioFull: "주말에 홍대에 갔어요. 예쁜 옷이 많았지만 조금 비쌌어요.",
+    sentences: [
+      {
+        tokens: [
+          { kr: "주말에", rom: "ju-ma-re", role: "Temps + 에", fr: "Pendant le week-end" },
+          { kr: "홍대에", rom: "hong-dae-e", role: "Lieu + 에", fr: "à Hongdae" },
+          { kr: "갔어요.", rom: "ga-sseo-yo", role: "Passé (가다)", fr: "je suis allé(e)" }
+        ],
+        fullFr: "Le week-end, je suis allé(e) à Hongdae."
+      },
+      {
+        tokens: [
+          { kr: "예쁜", rom: "ye-ppeun", role: "Adjectif qualifiant", fr: "de jolis" },
+          { kr: "옷이", rom: "o-si", role: "Sujet (옷 + 이)", fr: "vêtements" },
+          { kr: "많았지만", rom: "ma-nat-ji-man", role: "많다 + 지만 (mais)", fr: "il y en avait beaucoup, mais" },
+          { kr: "조금", rom: "jo-geum", role: "Adverbe", fr: "un peu" },
+          { kr: "비쌌어요.", rom: "bi-ssa-sseo-yo", role: "Passé (비싸다)", fr: "c'était cher." }
+        ],
+        fullFr: "Il y avait beaucoup de jolis vêtements, mais c'était un peu cher."
+      }
+    ],
+    quiz: {
+      q: "Comment étaient les vêtements à Hongdae ?",
+      opts: ["Jolis mais un peu chers (예쁜 옷이 많았지만 조금 비쌌어요)", "Très laids et bon marché", "Gratuits"],
+      correct: 0,
+      expl: "Le connecteur -지만 indique l'opposition : 많았지만 조금 비쌌어요."
+    }
+  }
+];
+
+// ==========================================
+// QUÊTES QUOTIDIENNES DU JOUR
+// ==========================================
+const DAILY_QUESTS_DEF = [
+  { id: "dq_sprint", title: "Faire 1 Défi Lecture Chrono 60s", xp: 20, icon: "⚡", tab: "practice" },
+  { id: "dq_mic", title: "Prononcer 2 phrases au Micro", xp: 25, icon: "🎤", tab: "practice" },
+  { id: "dq_rpg", title: "Terminer 1 Mission de Jeu de Rôle à Séoul", xp: 30, icon: "🎮", tab: "rpg" },
+  { id: "dq_hanja", title: "Explorer 2 Racines Hanja", xp: 15, icon: "🧬", tab: "hanja" },
+  { id: "dq_story", title: "Lire 1 Histoire au Survol Magique", xp: 20, icon: "📖", tab: "stories" }
+];
+
+// COMPARATEUR POLITESSE K-DRAMA
 const POLITENESS_COMPARISONS = [
   {
     meaning: "Bonjour / Salut",
@@ -692,9 +1251,7 @@ const POLITENESS_COMPARISONS = [
   }
 ];
 
-// ==========================================
-// ATELIER DE CONJUGAISON (PRÉSENT, PASSÉ, FUTUR, ENVIE -고 싶어요)
-// ==========================================
+// VERBES CONJUGUÉS A1
 const CONJUGATION_VERBS = [
   {
     id: "v_gada",
@@ -750,7 +1307,7 @@ const CONJUGATION_VERBS = [
     stem: "먹",
     meaning: "Manger",
     ruleGroup: "Autre voyelle (+어요)",
-    ruleNote: "Voyelle ㅓ + Batchim ㄱ : on ajoute simplement 어요 → 먹어요 (prononcé [머거요]).",
+    ruleNote: "Voyelle ㅓ + Batchim ㄱ : on ajoute simplement 어요 → 먹어요.",
     present: { kr: "먹어요", roman: "meo-geo-yo", fr: "Je mange" },
     past: { kr: "먹었어요", roman: "meo-geo-sseo-yo", fr: "J'ai mangé" },
     future: { kr: "먹을 거예요", roman: "meo-geul geo-ye-yo", fr: "Je mangerai" },
@@ -803,29 +1360,15 @@ const CONJUGATION_VERBS = [
     past: { kr: "공부했어요", roman: "gong-bu-hae-sseo-yo", fr: "J'ai étudié" },
     future: { kr: "공부할 거예요", roman: "gong-bu-hal geo-ye-yo", fr: "J'étudierai" },
     want: { kr: "공부하고 싶어요", roman: "gong-bu-ha-go si-peo-yo", fr: "Je veux étudier" }
-  },
-  {
-    id: "v_chupda",
-    infinitive: "춥다",
-    stem: "춥",
-    meaning: "Faire froid (Adjectif)",
-    ruleGroup: "Irrégulier en ㅂ (ㅂ → 우)",
-    ruleNote: "Règle importante : sur les adjectifs en ㅂ, le ㅂ disparaît et devient 우 + 어요 = 워요 → 추워요 !",
-    present: { kr: "추워요", roman: "chu-wo-yo", fr: "Il fait froid" },
-    past: { kr: "추웠어요", roman: "chu-wo-sseo-yo", fr: "Il faisait froid" },
-    future: { kr: "추울 거예요", roman: "chu-ul geo-ye-yo", fr: "Il fera froid" },
-    want: { kr: "— (Adjectif d'état)", roman: "-", fr: "—" }
   }
 ];
 
-// ==========================================
-// MINI-DIALOGUES RÉELS INTERACTIFS EN CONTEXTE
-// ==========================================
+// DIALOGUES A1
 const REAL_DIALOGUES = [
   {
     id: "dlg_1",
     title: "Dialogue 1 : Faire connaissance à Séoul",
-    situation: "Minji (coréenne) et Thomas (français) se rencontrent pour la première fois dans un échange linguistique.",
+    situation: "Minji (coréenne) et Thomas (français) se rencontrent pour la première fois.",
     level: "Débutant • 이에요/예요 & 은/는",
     lines: [
       {
@@ -847,14 +1390,14 @@ const REAL_DIALOGUES = [
         kr: "아, 반가워요! 토마 씨는 학생이에요?",
         roman: "A, ban-ga-wo-yo! To-ma ssi-neun hak-saeng-i-e-yo?",
         fr: "Ah, enchantée ! Thomas, êtes-vous étudiant ?",
-        grammarNote: "반가워요 = Enchanté(e) | 씨 = M./Mme poli après un prénom | 학생 + 이에요?"
+        grammarNote: "반가워요 = Enchanté(e) | 씨 = M./Mme | 학생 + 이에요?"
       },
       {
         speaker: "토마 (Thomas)",
         kr: "네, 학생이에요. 지금 한국어를 공부해요.",
         roman: "Ne, hak-saeng-i-e-yo. Ji-geum han-gu-geo-reul gong-bu-hae-yo.",
         fr: "Oui, je suis étudiant. Maintenant, j'étudie le coréen.",
-        grammarNote: "지금 (maintenant) + 한국어를 (objet : le coréen) + 공부해요 (étudie)."
+        grammarNote: "지금 (maintenant) + 한국어를 (le coréen) + 공부해요 (étudie)."
       }
     ],
     quiz: {
@@ -865,7 +1408,7 @@ const REAL_DIALOGUES = [
         "Parce que 예요 est au passé et 이에요 est au présent"
       ],
       correctIndex: 0,
-      explanation: "Exact ! Après une voyelle (토마) on colle 예요, et après une consonne finale / Batchim (사람) on colle 이에요."
+      explanation: "Après voyelle : 예요. Après consonne/Batchim : 이에요."
     }
   },
   {
@@ -879,28 +1422,28 @@ const REAL_DIALOGUES = [
         kr: "어서 오세요! 뭐 드릴까요?",
         roman: "Eo-seo o-se-yo! Mwo deu-ril-kka-yo?",
         fr: "Bienvenue ! Que puis-je vous servir ?",
-        grammarNote: "어서 오세요 = Bienvenue (dans toute boutique) | 뭐 = Quoi | 드릴까요 = Puis-je vous offrir ?"
+        grammarNote: "어서 오세요 = Bienvenue | 뭐 드릴까요 = Que puis-je vous offrir ?"
       },
       {
         speaker: "손님 (Client)",
         kr: "아이스 아메리카노 한 잔 주세요.",
         roman: "A-i-seu a-me-ri-ka-no han jan ju-se-yo.",
         fr: "Un Americano glacé, s'il vous plaît.",
-        grammarNote: "한 (1 en natif coréen) + 잔 (compteur de tasses/verres) + 주세요 (donnez-moi SVP)."
+        grammarNote: "한 (1 natif) + 잔 (compteur tasses) + 주세요 (donnez-moi SVP)."
       },
       {
         speaker: "직원 (Serveur)",
         kr: "네, 사천오백 원입니다.",
         roman: "Ne, sa-cheon-o-baek wo-nim-ni-da.",
         fr: "Très bien, c'est 4 500 wons.",
-        grammarNote: "사천 (4 000) + 오백 (500) + 원 (Wons) + 입니다 (c'est - style formel)."
+        grammarNote: "사천 (4 000) + 오백 (500) + 원 (Wons)."
       },
       {
         speaker: "손님 (Client)",
         kr: "여기 있어요. 감사합니다!",
         roman: "Yeo-gi i-sseo-yo. Gam-sa-ham-ni-da!",
         fr: "Voici (en tendant la carte). Merci beaucoup !",
-        grammarNote: "여기 있어요 = Litt. « C'est ici » (très utilisé en donnant quelque chose au vendeur)."
+        grammarNote: "여기 있어요 = C'est ici (en tendant quelque chose)."
       }
     ],
     quiz: {
@@ -911,171 +1454,106 @@ const REAL_DIALOGUES = [
         "45 000 wons"
       ],
       correctIndex: 0,
-      explanation: "사 (4) + 천 (1 000) = 4 000, et 오 (5) + 백 (100) = 500 → 4 500 wons !"
-    }
-  },
-  {
-    id: "dlg_3",
-    title: "Dialogue 3 : Où vas-tu ? (에 vs 에서)",
-    situation: "Deux amis discutent de leur programme de l'après-midi.",
-    level: "Grammaire • Lieu 에 vs 에서 & -고 싶어요",
-    lines: [
-      {
-        speaker: "준호 (Junho)",
-        kr: "지금 어디에 가요?",
-        roman: "Ji-geum eo-di-e ga-yo?",
-        fr: "Où vas-tu maintenant ?",
-        grammarNote: "어디 (où) + 에 (destination) + 가요 (vas)."
-      },
-      {
-        speaker: "수진 (Sujin)",
-        kr: "식당에 가요. 밥을 먹고 싶어요.",
-        roman: "Sik-ttang-e ga-yo. Ba-beul meok-go si-peo-yo.",
-        fr: "Je vais au restaurant. J'ai envie de manger un repas.",
-        grammarNote: "식당에 가요 (destination = 에) | 먹고 싶어요 = Radical 먹 + 고 싶어요 (vouloir manger)."
-      },
-      {
-        speaker: "준호 (Junho)",
-        kr: "저도 배고파요! 식당에서 같이 먹어요.",
-        roman: "Jeo-do bae-go-pa-yo! Sik-ttang-e-seo ga-chi meo-geo-yo.",
-        fr: "Moi aussi j'ai faim ! Mangeons ensemble au restaurant.",
-        grammarNote: "저도 = Moi aussi (도 = aussi) | 식당에서 = Action de manger DANS le restaurant (에서) | 같이 = Ensemble."
-      }
-    ],
-    quiz: {
-      question: "Pourquoi utilise-t-on « 식당에 가요 » dans la 2e phrase mais « 식당에서 먹어요 » dans la 3e ?",
-      options: [
-        "Parce que 에 indique la destination (aller à) et 에서 indique le lieu d'une action (manger dans)",
-        "Parce que Junho parle de manière plus formelle",
-        "C'est exactement pareil, on peut échanger les deux"
-      ],
-      correctIndex: 0,
-      explanation: "Avec 가요 (aller), le lieu est une destination (에). Avec 먹어요 (manger), c'est une action qui se déroule dans le lieu (에서)."
+      explanation: "사천 (4 000) + 오백 (500) = 4 500 wons !"
     }
   }
 ];
 
-// ==========================================
-// VOCABULAIRE STRUCTURÉ PAR THÈMES ESSENTIELS
-// ==========================================
+// VOCABULAIRE THÉMATIQUE
 const VOCAB_CATEGORIES = [
   {
     id: "voc_survival",
     title: "1. Salutations & Expressions indispensables",
     icon: "👋",
-    description: "Les vraies expressions utilisées au quotidien en Corée avec leur sens littéral.",
+    description: "Les vraies expressions utilisées au quotidien en Corée.",
     words: [
-      { kr: "안녕하세요", roman: "an-nyeong-ha-se-yo", fr: "Bonjour / Bonsoir (poli)", note: "Litt. « Êtes-vous en paix ? » — S'utilise toute la journée." },
-      { kr: "감사합니다", roman: "gam-sa-ham-ni-da", fr: "Merci (formel)", note: "Le ㅂ de 합 devant ㄴ se prononce [m] -> gam-sa-ham-ni-da." },
-      { kr: "고마워요", roman: "go-ma-wo-yo", fr: "Merci (poli courant)", note: "Plus chaleureux au quotidien que 감사합니다." },
-      { kr: "네 / 아니요", roman: "ne / a-ni-yo", fr: "Oui / Non", note: "« 네 » sert aussi à dire « je vous écoute / d'accord »." },
-      { kr: "죄송합니다", roman: "joe-song-ham-ni-da", fr: "Je suis désolé(e) / Pardon", note: "Pour s'excuser poliment." },
-      { kr: "잠시만요", roman: "jam-si-man-yo", fr: "Excusez-moi (pour passer) / Un instant SVP", note: "Litt. « Juste un petit moment »." },
-      { kr: "주세요", roman: "ju-se-yo", fr: "Donnez-moi ... s'il vous plaît", note: "Magique au restaurant : 물 주세요 = De l'eau s'il vous plaît !" },
-      { kr: "얼마예요?", roman: "eol-ma-ye-yo?", fr: "Combien ça coûte ?", note: "얼마 (combien) + 예요 (c'est)." },
-      { kr: "괜찮아요", roman: "gwaen-cha-na-yo", fr: "Ça va / C'est bon / Pas de souci", note: "S'utilise avec une intonation montante pour demander « Ça va ? »." },
-      { kr: "안녕히 가세요", roman: "an-nyeong-hi ga-se-yo", fr: "Au revoir (dit à quelqu'un qui part)", note: "Litt. « Allez en paix »." },
-      { kr: "안녕히 계세요", roman: "an-nyeong-hi gye-se-yo", fr: "Au revoir (dit quand VOUS partez)", note: "Litt. « Restez en paix »." }
+      { kr: "안녕하세요", roman: "an-nyeong-ha-se-yo", fr: "Bonjour / Bonsoir (poli)", note: "S'utilise toute la journée." },
+      { kr: "감사합니다", roman: "gam-sa-ham-ni-da", fr: "Merci (formel)", note: "Prononcé [gam-sa-ham-ni-da]." },
+      { kr: "고마워요", roman: "go-ma-wo-yo", fr: "Merci (poli courant)", note: "Plus chaleureux au quotidien." },
+      { kr: "네 / 아니요", roman: "ne / a-ni-yo", fr: "Oui / Non", note: "네 sert aussi à dire « je vous écoute »." },
+      { kr: "죄송합니다", roman: "joe-song-ham-ni-da", fr: "Pardon / Désolé", note: "Pour s'excuser poliment." },
+      { kr: "잠시만요", roman: "jam-si-man-yo", fr: "Un instant SVP / Excusez-moi", note: "Litt. « Juste un petit moment »." },
+      { kr: "주세요", roman: "ju-se-yo", fr: "Donnez-moi ... SVP", note: "물 주세요 = De l'eau SVP." },
+      { kr: "얼마예요?", roman: "eol-ma-ye-yo?", fr: "Combien ça coûte ?", note: "얼마 (combien) + 예요." },
+      { kr: "괜찮아요", roman: "gwaen-cha-na-yo", fr: "Ça va / Pas de souci", note: "Intonation montante = Ça va ?" },
+      { kr: "안녕히 가세요", roman: "an-nyeong-hi ga-se-yo", fr: "Au revoir (à celui qui part)", note: "Litt. « Allez en paix »." },
+      { kr: "안녕히 계세요", roman: "an-nyeong-hi gye-se-yo", fr: "Au revoir (quand vous partez)", note: "Litt. « Restez en paix »." }
     ]
   },
   {
     id: "voc_people",
-    title: "2. Pronoms, Personnes & Identité",
+    title: "2. Pronoms & Personnes",
     icon: "🧑‍🤝‍🧑",
-    description: "Comment parler de soi, des autres et des métiers.",
+    description: "Parler de soi et des autres.",
     words: [
-      { kr: "저 / 나", roman: "jeo / na", fr: "Je, Moi (poli / familier)", note: "Avec 는 : 저는 (jeo-neun) / 나는 (na-neun)." },
-      { kr: "우리", roman: "u-ri", fr: "Nous / Notre", note: "Les Coréens disent « notre pays » (우리 나라) ou « notre maison » (우리 집) au lieu de « mon »." },
-      { kr: "사람", roman: "sa-ram", fr: "Personne / Être humain", note: "Pays + 사람 = Nationalité (프랑스 사람 = Français)." },
-      { kr: "친구", roman: "chin-gu", fr: "Ami(e)", note: "En Corée, réservé en général aux personnes nées la même année." },
-      { kr: "학생", roman: "hak-saeng", fr: "Étudiant(e) / Élève", note: "학 (étude) + 생 (personne/vie)." },
-      { kr: "선생님", roman: "seon-saeng-nim", fr: "Professeur / Enseignant(e)", note: "-님 est un suffixe de grand respect." },
-      { kr: "회사원", roman: "hoe-sa-won", fr: "Employé(e) de bureau", note: "회사 (entreprise) + 원 (membre)." },
-      { kr: "의사", roman: "ui-sa", fr: "Médecin", note: "Sans Batchim -> 의사예요 (Je suis médecin)." },
-      { kr: "이름", roman: "i-reum", fr: "Nom / Prénom", note: "이름이 뭐예요? = Quel est votre nom ?" },
-      { kr: "한국 / 프랑스", roman: "han-guk / peu-rang-seu", fr: "Corée / France", note: "한국어 = la langue coréenne, 프랑스어 = le français." }
+      { kr: "저 / 나", roman: "jeo / na", fr: "Je, Moi (poli / familier)", note: "저는 (poli) / 나는 (familier)." },
+      { kr: "우리", roman: "u-ri", fr: "Nous / Notre", note: "우리 나라 = notre pays." },
+      { kr: "사람", roman: "sa-ram", fr: "Personne / Humain", note: "프랑스 사람 = Français." },
+      { kr: "친구", roman: "chin-gu", fr: "Ami(e)", note: "Personnes du même âge." },
+      { kr: "학생", roman: "hak-saeng", fr: "Étudiant(e)", note: "학 (étude) + 생 (personne)." },
+      { kr: "선생님", roman: "seon-saeng-nim", fr: "Professeur(e)", note: "-님 marque le grand respect." },
+      { kr: "회사원", roman: "hoe-sa-won", fr: "Employé(e) de bureau", note: "회사 (entreprise) + 원." }
     ]
   },
   {
     id: "voc_verbs",
-    title: "3. Les Verbes & Adjectifs indispensables",
+    title: "3. Verbes & Adjectifs indispensables",
     icon: "⚡",
-    description: "Donnés avec leur infinitif (-다) ET leur forme conjuguée directe au présent poli (-아요/-어요) !",
+    description: "Avec forme infinitif et présent poli.",
     words: [
-      { kr: "가다 → 가요", roman: "ga-da → ga-yo", fr: "Aller → Je vais", note: "Voyelle ㅏ -> +아요 (가요)." },
-      { kr: "오다 → 와요", roman: "o-da → wa-yo", fr: "Venir → Je viens", note: "ㅗ + ㅏ요 fusionnent en 와요." },
-      { kr: "먹다 → 먹어요", roman: "meok-da → meo-geo-yo", fr: "Manger → Je mange", note: "Voyelle ㅓ -> +어요." },
-      { kr: "마시다 → 마셔요", roman: "ma-si-da → ma-syeo-yo", fr: "Boire → Je bois", note: "시 + 어요 fusionnent en 셔요." },
-      { kr: "보다 → 봐요", roman: "bo-da → bwa-yo", fr: "Voir / Regarder → Je regarde", note: "영화를 봐요 = Je regarde un film." },
-      { kr: "하다 → 해요", roman: "ha-da → hae-yo", fr: "Faire → Je fais", note: "Sert à former des centaines de verbes !" },
-      { kr: "공부하다 → 공부해요", roman: "gong-bu-ha-da → gong-bu-hae-yo", fr: "Étudier → J'étudie", note: "공부 (étude) + 하다 (faire)." },
-      { kr: "일하다 → 일해요", roman: "il-ha-da → i-rae-yo", fr: "Travailler → Je travaille", note: "일 (travail) + 하다 (faire)." },
-      { kr: "좋아하다 → 좋아해요", roman: "jo-a-ha-da → jo-a-hae-yo", fr: "Aimer / Apprécier → J'aime", note: "Avec la particule 을/를 : 한국을 좋아해요." },
-      { kr: "맛있다 → 맛있어요", roman: "ma-sit-da → ma-si-sseo-yo", fr: "Être délicieux → C'est bon", note: "맛 (goût) + 있다 (avoir)." },
-      { kr: "좋다 → 좋아요", roman: "jo-ta → jo-a-yo", fr: "Être bon / bien → C'est super", note: "Le ㅎ est muet dans 좋아요 (jo-a-yo)." },
-      { kr: "비싸다 → 비싸요", roman: "bi-ssa-da → bi-ssa-yo", fr: "Être cher → C'est cher", note: "Opposé : 싸다 -> 싸요 (pas cher)." }
+      { kr: "가다 → 가요", roman: "ga-da → ga-yo", fr: "Aller → Je vais", note: "ㅏ -> +아요." },
+      { kr: "오다 → 와요", roman: "o-da → wa-yo", fr: "Venir → Je viens", note: "ㅗ + ㅏ요 = 와요." },
+      { kr: "먹다 → 먹어요", roman: "meok-da → meo-geo-yo", fr: "Manger → Je mange", note: "ㅓ -> +어요." },
+      { kr: "마시다 → 마셔요", roman: "ma-si-da → ma-syeo-yo", fr: "Boire → Je bois", note: "ㅣ + 어요 = ㅕ요." },
+      { kr: "보다 → 봐요", roman: "bo-da → bwa-yo", fr: "Voir / Regarder", note: "ㅗ + ㅏ요 = 봐요." },
+      { kr: "하다 → 해요", roman: "ha-da → hae-yo", fr: "Faire → Je fais", note: "Base de nombreux verbes." },
+      { kr: "공부하다 → 공부해요", roman: "gong-bu-ha-da → gong-bu-hae-yo", fr: "Étudier", note: "공부 + 하다." },
+      { kr: "맛있다 → 맛있어요", roman: "ma-sit-da → ma-si-sseo-yo", fr: "C'est délicieux", note: "맛 (goût) + 있다." }
     ]
   },
   {
     id: "voc_daily",
-    title: "4. Quotidien, Nourriture, Lieux & Temps",
+    title: "4. Quotidien & Lieux",
     icon: "🍜",
-    description: "Les noms les plus utiles pour construire vos premières vraies phrases.",
+    description: "Mots du quotidien.",
     words: [
-      { kr: "물", roman: "mul", fr: "Eau", note: "물을 마셔요 = Je bois de l'eau." },
-      { kr: "밥", roman: "bap", fr: "Riz cuit / Repas", note: "밥 먹었어요? = As-tu mangé ?" },
-      { kr: "커피", roman: "keo-pi", fr: "Café", note: "커피 한 잔 주세요 = Un café s'il vous plaît." },
-      { kr: "집", roman: "jip", fr: "Maison / Chez-soi", note: "집에 가요 = Je rentre à la maison." },
-      { kr: "학교", roman: "hak-gyo", fr: "École / Université", note: "학교에서 공부해요 = J'étudie à l'école." },
-      { kr: "회사", roman: "hoe-sa", fr: "Entreprise / Bureau", note: "회사에 가요 = Je vais au travail." },
-      { kr: "식당", roman: "sik-ttang", fr: "Restaurant", note: "식당에서 밥을 먹어요 = Je mange au restaurant." },
-      { kr: "오늘", roman: "o-neul", fr: "Aujourd'hui", note: "Pas besoin de particule après 오늘 !" },
-      { kr: "내일", roman: "nae-il", fr: "Demain", note: "내일 봐요 ! = À demain !" },
-      { kr: "지금", roman: "ji-geum", fr: "Maintenant", note: "지금 뭐 해요? = Que fais-tu maintenant ?" }
-    ]
-  },
-  {
-    id: "voc_numbers",
-    title: "5. Les Nombres (Sino-Coréens vs Natifs Coréens)",
-    icon: "🔢",
-    description: "En coréen, il existe deux systèmes : Sino-coréen (dates, prix, minutes, téléphone) et Natif (heures, âge, compter des objets).",
-    words: [
-      { kr: "일 (1) / 하나 (1)", roman: "il / ha-na", fr: "Un (Sino / Natif)", note: "Sino : 일 (1), Natif : 하나 (devient 한 devant un compteur)." },
-      { kr: "이 (2) / 둘 (2)", roman: "i / dul", fr: "Deux (Sino / Natif)", note: "Sino : 이, Natif : 둘 (devient 두 devant un compteur)." },
-      { kr: "삼 (3) / 셋 (3)", roman: "sam / set", fr: "Trois (Sino / Natif)", note: "Sino : 삼, Natif : 셋 (devient 세 devant un compteur)." },
-      { kr: "사 (4) / 넷 (4)", roman: "sa / net", fr: "Quatre (Sino / Natif)", note: "Sino : 사, Natif : 넷 (devient 네 devant un compteur)." },
-      { kr: "오 (5) / 다섯 (5)", roman: "o / da-seot", fr: "Cinq (Sino / Natif)", note: "Sino : 오, Natif : 다섯." },
-      { kr: "십 (10) / 열 (10)", roman: "sip / yeol", fr: "Dix (Sino / Natif)", note: "20 en sino = 이십 (2x10). 11 = 십일 (10+1)." },
-      { kr: "백 (100) / 천 (1000) / 만 (10 000)", roman: "baek / cheon / man", fr: "100 / 1 000 / 10 000 (Sino)", note: "Pour les prix en Wons (원) : 오천 원 = 5 000 wons." }
+      { kr: "물", roman: "mul", fr: "Eau", note: "물을 마셔요." },
+      { kr: "밥", roman: "bap", fr: "Riz cuit / Repas", note: "밥 먹었어요?" },
+      { kr: "커피", roman: "keo-pi", fr: "Café", note: "커피 한 잔 주세요." },
+      { kr: "집", roman: "jip", fr: "Maison", note: "집에 가요." },
+      { kr: "학교", roman: "hak-gyo", fr: "École", note: "학교에서 공부해요." },
+      { kr: "식당", roman: "sik-ttang", fr: "Restaurant", note: "식당에서 먹어요." },
+      { kr: "오늘", roman: "o-neul", fr: "Aujourd'hui", note: "오늘 안 가요." },
+      { kr: "지금", roman: "ji-geum", fr: "Maintenant", note: "지금 뭐 해요?" }
     ]
   }
 ];
 
-// DÉFIS PRONONCIATION AU MICRO (SPEECH RECOGNITION KO-KR)
+// DÉFIS MICRO
 const MIC_CHALLENGES = [
-  { kr: "안녕하세요", roman: "an-nyeong-ha-se-yo", fr: "Bonjour (poli)", tip: "Prononcez bien « an-nyeong-ha-sé-yo » d'une traite." },
-  { kr: "감사합니다", roman: "gam-sa-ham-ni-da", fr: "Merci (formel)", tip: "Attention : 합 devant 니 se prononce [함니 / ham-ni] !" },
-  { kr: "물 주세요", roman: "mul ju-se-yo", fr: "De l'eau s'il vous plaît", tip: "Le ㄹ final de 물 est un L doux." },
-  { kr: "커피 마셔요", roman: "keo-pi ma-syeo-yo", fr: "Je bois du café", tip: "커 a un K soufflé + le o ouvert de « porte »." },
-  { kr: "학교에 가요", roman: "hak-gyo-e ga-yo", fr: "Je vais à l'école", tip: "학 (hak) + 교 (gyo) + 에 (é) + 가요 (ga-yo)." },
-  { kr: "한국어를 공부해요", roman: "han-gu-geo-reul gong-bu-hae-yo", fr: "J'étudie le coréen", tip: "Faites bien la liaison : 한국어 se dit [한구거 / han-gu-geo] !" },
-  { kr: "맛있어요", roman: "ma-si-sseo-yo", fr: "C'est délicieux", tip: "Liaison : 맛있어요 se prononce [마시써요 / ma-shi-sseo-yo]." },
-  { kr: "사랑해요", roman: "sa-rang-hae-yo", fr: "Je t'aime", tip: "Le ㅇ de 랑 résonne bien en -ng." }
+  { kr: "안녕하세요", roman: "an-nyeong-ha-se-yo", fr: "Bonjour (poli)", tip: "Prononcez bien d'une traite." },
+  { kr: "감사합니다", roman: "gam-sa-ham-ni-da", fr: "Merci (formel)", tip: "합 devant 니 se dit [함니 / ham-ni]." },
+  { kr: "물 주세요", roman: "mul ju-se-yo", fr: "De l'eau SVP", tip: "L doux sur 물." },
+  { kr: "커피 마셔요", roman: "keo-pi ma-syeo-yo", fr: "Je bois du café", tip: "커피 : K soufflé." },
+  { kr: "학교에 가요", roman: "hak-gyo-e ga-yo", fr: "Je vais à l'école", tip: "학-교-에-가-요." },
+  { kr: "한국어를 공부해요", roman: "han-gu-geo-reul gong-bu-hae-yo", fr: "J'étudie le coréen", tip: "Liaison : [한구거]." },
+  { kr: "맛있어요", roman: "ma-si-sseo-yo", fr: "C'est délicieux", tip: "Liaison : [마시써요]." },
+  { kr: "사랑해요", roman: "sa-rang-hae-yo", fr: "Je t'aime", tip: "ㅇ de 랑 résonne en -ng." }
 ];
 
-// CHECKLIST DE PROGRESSION NIVEAU 1 (OBJECTIF A1)
+// CHECKLIST NIVEAU 1
 const LEVEL1_CHECKLIST = [
-  { id: "chk_1", title: "1. Maîtriser les 8 voyelles simples & 10 consonnes de base", desc: "Savoir différencier ㅏ/ㅓ, ㅗ/ㅜ/ㅡ et lire un bloc simple (가, 나, 다, 마, 사).", tab: "hangul" },
-  { id: "chk_2", title: "2. Maîtriser les voyelles composées (Y/W) & consonnes doubles/aspirées", desc: "Entendre la différence entre 가 (doux), 카 (soufflé) et 까 (tendu).", tab: "hangul" },
-  { id: "chk_3", title: "3. Comprendre le Batchim (7 sons finaux) et la règle de Liaison", desc: "Savoir pourquoi 옷 se lit [ot] et pourquoi 한국어 se lit [한구거].", tab: "hangul" },
-  { id: "chk_4", title: "4. Savoir se présenter avec 은/는 et 이에요/예요", desc: "Construire « 저는 [Nom]이에요/예요 » selon la consonne ou voyelle finale.", tab: "grammar" },
-  { id: "chk_5", title: "5. Utiliser les particules d'objet (을/를) et de lieu (에 vs 에서)", desc: "Différencier « aller à un endroit (에) » et « agir dans un endroit (에서) ».", tab: "grammar" },
-  { id: "chk_6", title: "6. Conjuguer un verbe au Présent (-아요/어요), Passé, Futur et Envie (-고 싶어요)", desc: "Passer de l'infinitif (-다) aux 4 temps principaux sans hésiter.", tab: "conjugation" },
-  { id: "chk_7", title: "7. Lire l'heure (Natif + Sino) et compter les prix en Wons (만 / 천)", desc: "Comprendre les deux systèmes numériques coréens et les 4 compteurs (개, 잔, 명, 살).", tab: "numbers" },
-  { id: "chk_8", title: "8. Comprendre les 3 dialogues de survie & réussir le Défi Chrono", desc: "Lire des phrases complètes en contexte sans regarder la romanisation.", tab: "dialogues" }
+  { id: "chk_1", title: "1. Maîtriser les 8 voyelles simples & 10 consonnes de base", desc: "Savoir différencier ㅏ/ㅓ, ㅗ/ㅜ/ㅡ et lire un bloc simple.", tab: "hangul" },
+  { id: "chk_2", title: "2. Maîtriser les voyelles en Y/W & consonnes aspirées/doubles", desc: "Entendre la différence entre 가, 카 et 까.", tab: "hangul" },
+  { id: "chk_3", title: "3. Comprendre le Batchim (7 sons finaux) et la Liaison", desc: "Savoir pourquoi 옷 se lit [ot] et 한국어 se lit [한구거].", tab: "hangul" },
+  { id: "chk_4", title: "4. Savoir se présenter avec 은/는 et 이에요/예요", desc: "Construire « 저는 [Nom]이에요/예요 » sans hésiter.", tab: "grammar" },
+  { id: "chk_5", title: "5. Utiliser les particules d'objet (을/를) et de lieu (에 vs 에서)", desc: "Différencier aller à (에) et agir dans (에서).", tab: "grammar" },
+  { id: "chk_6", title: "6. Conjuguer au Présent (-아요/어요), Passé, Futur et Envie", desc: "Passer de l'infinitif (-다) aux 4 temps clés.", tab: "conjugation" },
+  { id: "chk_7", title: "7. Lire l'heure et compter les prix en Wons (만 / 천)", desc: "Comprendre les deux systèmes de nombres et les compteurs.", tab: "numbers" },
+  { id: "chk_8", title: "8. Réussir l'Examen Blanc Niveau 1", desc: "Valider ses acquis avant de passer au Niveau 2 !", tab: "practice" }
 ];
 
-// MOTS POUR LE MODE DICTÉE / CLAVIER HANGEUL
+// DICTÉE CLAVIER HANGEUL
 const DICTATION_WORDS = [
   { id: "dic_1", kr: "아이", roman: "a-i", fr: "Enfant", hint: "아 (a) + 이 (i)" },
   { id: "dic_2", kr: "우유", roman: "u-yu", fr: "Lait", hint: "우 (ou) + 유 (you)" },
@@ -1085,16 +1563,10 @@ const DICTATION_WORDS = [
   { id: "dic_6", kr: "커피", roman: "keo-pi", fr: "Café", hint: "ㅋ+ㅓ (커) + ㅍ+ㅣ (피)" },
   { id: "dic_7", kr: "학교", roman: "hak-gyo", fr: "École", hint: "ㅎ+ㅏ+ㄱ (학) + ㄱ+ㅛ (교)" },
   { id: "dic_8", kr: "한국", roman: "han-guk", fr: "Corée", hint: "ㅎ+ㅏ+ㄴ (한) + ㄱ+ㅜ+ㄱ (국)" },
-  { id: "dic_9", kr: "사랑", roman: "sa-rang", fr: "Amour", hint: "ㅅ+ㅏ (사) + ㄹ+ㅏ+ㅇ (랑)" },
-  { id: "dic_10", kr: "친구", roman: "chin-gu", fr: "Ami(e)", hint: "ㅊ+ㅣ+ㄴ (친) + ㄱ+ㅜ (구)" },
-  { id: "dic_11", kr: "오늘", roman: "o-neul", fr: "Aujourd'hui", hint: "ㅇ+ㅗ (오) + ㄴ+ㅡ+ㄹ (늘)" },
-  { id: "dic_12", kr: "가요", roman: "ga-yo", fr: "Je vais (Aller)", hint: "ㄱ+ㅏ (가) + ㅇ+ㅛ (요)" },
-  { id: "dic_13", kr: "먹어요", roman: "meo-geo-yo", fr: "Je mange", hint: "ㅁ+ㅓ+ㄱ (먹) + ㅇ+ㅓ (어) + ㅇ+ㅛ (요)" }
+  { id: "dic_9", kr: "사랑", roman: "sa-rang", fr: "Amour", hint: "ㅅ+ㅏ (사) + ㄹ+ㅏ+ㅇ (랑)" }
 ];
 
-// ==========================================
-// BANQUE D'EXERCICES DE GRAMMAIRE & PHRASES
-// ==========================================
+// BANQUE D'EXERCICES A1
 const GRAMMAR_EXERCISES = [
   {
     id: "gex_1",
@@ -1106,7 +1578,7 @@ const GRAMMAR_EXERCISES = [
     audioFull: "저는 학생이에요.",
     correct: "이에요",
     options: ["이에요", "예요", "을", "에서"],
-    explanation: "« 학생 » (étudiant) se termine par la consonne ㅇ (Batchim) : on utilise donc « 이에요 »."
+    explanation: "« 학생 » finit par la consonne ㅇ (Batchim) : on met « 이에요 »."
   },
   {
     id: "gex_2",
@@ -1118,7 +1590,7 @@ const GRAMMAR_EXERCISES = [
     audioFull: "저는 의사예요.",
     correct: "예요",
     options: ["예요", "이에요", "를", "은"],
-    explanation: "« 의사 » (médecin) se termine par la voyelle ㅏ (sans Batchim) : on utilise donc « 예요 »."
+    explanation: "« 의사 » finit par la voyelle ㅏ : on met « 예요 »."
   },
   {
     id: "gex_3",
@@ -1130,7 +1602,7 @@ const GRAMMAR_EXERCISES = [
     audioFull: "물을 마셔요.",
     correct: "을",
     options: ["을", "를", "에", "이에요"],
-    explanation: "« 물 » (eau) est l'objet du verbe boire et finit par la consonne ㄹ (Batchim) → particule d'objet « 을 »."
+    explanation: "« 물 » finit par la consonne ㄹ (Batchim) → particule « 을 »."
   },
   {
     id: "gex_4",
@@ -1142,7 +1614,7 @@ const GRAMMAR_EXERCISES = [
     audioFull: "커피를 마셔요.",
     correct: "를",
     options: ["를", "을", "에서", "은"],
-    explanation: "« 커피 » (café) est l'objet direct et finit par la voyelle ㅣ (sans Batchim) → particule d'objet « 를 »."
+    explanation: "« 커피 » finit par voyelle → particule « 를 »."
   },
   {
     id: "gex_5",
@@ -1154,7 +1626,7 @@ const GRAMMAR_EXERCISES = [
     audioFull: "학교에 가요.",
     correct: "에",
     options: ["에", "에서", "를", "은"],
-    explanation: "Avec le verbe de déplacement « 가요 » (aller), la destination est toujours marquée par « 에 »."
+    explanation: "Destination avec 가요 → « 에 »."
   },
   {
     id: "gex_6",
@@ -1166,75 +1638,21 @@ const GRAMMAR_EXERCISES = [
     audioFull: "학교에서 공부해요.",
     correct: "에서",
     options: ["에서", "에", "을", "가"],
-    explanation: "« 공부해요 » (étudier) est une action dynamique qui se déroule dans un lieu → on utilise « 에서 »."
-  },
-  {
-    id: "gex_7",
-    type: "fill_particle",
-    category: "Présent Poli (-아요 / -어요 / -해요)",
-    promptFr: "Je mange un repas (du riz). (Verbe : 먹다)",
-    sentenceBefore: "밥을 ",
-    sentenceAfter: ".",
-    audioFull: "밥을 먹어요.",
-    correct: "먹어요",
-    options: ["먹어요", "먹아요", "먹해요", "먹다"],
-    explanation: "Le radical « 먹 » contient la voyelle ㅓ (qui n'est ni ㅏ ni ㅗ) : on ajoute donc « -어요 » → 먹어요."
-  },
-  {
-    id: "gex_11",
-    type: "fill_particle",
-    category: "Connecteurs (-고 vs -지만)",
-    promptFr: "C'est cher, MAIS c'est délicieux ! (Adjectif : 비싸다)",
-    sentenceBefore: "비싸",
-    sentenceAfter: " 맛있어요!",
-    audioFull: "비싸지만 맛있어요!",
-    correct: "지만",
-    options: ["지만", "고", "에서", "를"],
-    explanation: "Pour exprimer l'opposition (« mais »), on enlève -다 et on ajoute « -지만 » → 비싸지만."
+    explanation: "Action active dans un lieu → « 에서 »."
   },
   {
     id: "gex_8",
     type: "sentence_order",
-    category: "Construction de phrase (Ordre S-O-V)",
-    promptFr: "Remettez les blocs dans l'ordre coréen : « Je mange du riz au restaurant. »",
+    category: "Construction S-O-V",
+    promptFr: "Remettez les blocs dans l'ordre : « Je mange du riz au restaurant. »",
     audioFull: "식당에서 밥을 먹어요.",
     blocks: ["식당에서", "밥을", "먹어요"],
     distractors: ["학교에"],
-    explanation: "En coréen : Lieu d'action (식당에서) + Objet (밥을) + Verbe à la toute fin (먹어요)."
-  },
-  {
-    id: "gex_9",
-    type: "sentence_order",
-    category: "Construction de phrase (Ordre S-O-V)",
-    promptFr: "Construisez la phrase : « J'étudie le coréen aujourd'hui. »",
-    audioFull: "오늘 한국어를 공부해요.",
-    blocks: ["오늘", "한국어를", "공부해요"],
-    distractors: ["마셔요"],
-    explanation: "Temps (오늘 = aujourd'hui) + Objet avec 를 (한국어를 = le coréen) + Verbe à la fin (공부해요 = j'étudie)."
-  },
-  {
-    id: "gex_10",
-    type: "sentence_order",
-    category: "Construction de phrase (Ordre S-O-V)",
-    promptFr: "Construisez la phrase : « Aujourd'hui, je ne vais pas au travail (à l'entreprise). »",
-    audioFull: "오늘 회사에 안 가요.",
-    blocks: ["오늘", "회사에", "안", "가요"],
-    distractors: ["먹어요"],
-    explanation: "Temps (오늘) + Destination (회사에) + Négation (안) placée juste devant le verbe final (가요)."
-  },
-  {
-    id: "gex_12",
-    type: "sentence_order",
-    category: "Connecteurs & Phrases longues",
-    promptFr: "Construisez la phrase : « Je vais au café avec un ami et je bois un café. »",
-    audioFull: "친구랑 카페에 가고 커피를 마셔요.",
-    blocks: ["친구랑", "카페에", "가고", "커피를", "마셔요"],
-    distractors: ["먹어요"],
-    explanation: "친구랑 (avec un ami) + 카페에 가고 (vais au café et) + 커피를 마셔요 (bois un café)."
+    explanation: "Lieu d'action (식당에서) + Objet (밥을) + Verbe (먹어요)."
   }
 ];
 
-// Données pour le Laboratoire de Syllabes & l'Automate Clavier Hangeul (Unicode)
+// AUTOMATE CLAVIER JAMO
 const CHOSEONG_LIST = [
   { char: "ㄱ", roman: "g" }, { char: "ㄲ", roman: "kk" }, { char: "ㄴ", roman: "n" },
   { char: "ㄷ", roman: "d" }, { char: "ㄸ", roman: "tt" }, { char: "ㄹ", roman: "r/l" },
